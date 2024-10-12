@@ -4,8 +4,10 @@ import { TypeAnimation } from 'react-type-animation'
 import {FaArrowRight} from "react-icons/fa"
 
 const Codeblock = ({position,heading,subHeading,catbtn1,catbtn2,codeBlock,codeColor}) => {
+    // console.log(codeColor)
+    // console.log(catbtn1)
     return (
-        <div className={`flex ${position} my-20 justify-between gap-10`}>
+        <div className={` ml-4 flex ${position} mt-8 w-11/12 justify-between gap-10`}>
             <div className='w-[50%] flex flex-col gap-8'>
                 {heading}
                 <div className='text-richblack-300 font-bold'>
@@ -13,14 +15,14 @@ const Codeblock = ({position,heading,subHeading,catbtn1,catbtn2,codeBlock,codeCo
                 </div>
 
                 <div className='flex gap-7 mt-7'>
-                    <BUtton active={catbtn1.active} linkto={catbtn1.linkTo}>
+                    <BUtton active={catbtn1.active} link={catbtn1.linkTo}>
                         <div className='flex gap-2 items-center'>
                             {catbtn1.btnText}
                             <FaArrowRight/>
                         </div>
                     </BUtton>
 
-                    <BUtton active={catbtn2.active} linkto={catbtn2.linkTo}>
+                    <BUtton active={catbtn2.active} link={catbtn2.linkTo}>
                         {catbtn2.btnText}
                     </BUtton>
                 </div>
@@ -28,8 +30,8 @@ const Codeblock = ({position,heading,subHeading,catbtn1,catbtn2,codeBlock,codeCo
 
 
             {/* section second for the numbers */}
-            <div className='h-fit flex flex-row text-10[px] w-[100%] py-4 lg:w-[500px]'>
-                <div  className='text-center flex flex-col w-[10%] text-richblack-900 font-inter font-bold' >
+            <div className='h-fit flex flex-row text-10[px] w-[90%] py-4 lg:w-[500px] '>
+                <div  className='text-center flex flex-col w-[10%] text-richblack-900 font-inter font-bold ' >
                     <p>1</p>
                     <p>2</p>
                     <p>3</p>
