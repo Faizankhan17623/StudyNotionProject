@@ -6,7 +6,7 @@ exports.Createcategory = async(req,res)=>{
         if(!name||!description){
             return res.status(500).json({
                 success:false,
-                message:"The name and the description are not required"
+                message:"both of them are required"
             })
         }
 
@@ -28,11 +28,12 @@ exports.Createcategory = async(req,res)=>{
 
 exports.GetAllCategories = async (req,res) => {
     try {
-        const FetchAll = await Category.find({},{name:true},{description:true});
+        const FetchAll = await Category.find({});
         console.log(FetchAll);
         res.status(200).json({
             success:true,
-            message:`The data is been created ${FetchAll}`
+            message:`The data is been created`,
+            FetchAll
         })
     } catch (error) {
         console.log("There is an error in  the code");
@@ -44,7 +45,7 @@ exports.GetAllCategories = async (req,res) => {
 exports.CategroyPageDetails = async(req,res)=>{
     try {
         const {categoryId} = req.body;
-        const SelectedCources =await Category.findById(categoryId).populate("courses").exec();
+        const SelectedCources =await Category.findById(categoryId);
         if(!SelectedCources){
             return res.status(404).json({
                 success:false,
