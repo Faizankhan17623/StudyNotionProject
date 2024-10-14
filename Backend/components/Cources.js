@@ -4,16 +4,17 @@ const Category = require('../modules/Category')
 const {imageUpload} = require('../utils/imageuploader');
 exports.CreateCOurces = async (req,res) => {
     try {
-        const {courcename,courceDescription,whatYouWillLearn,price,tag,status} = req.body;
-        const thumbnail = req.files.thumbnail   
+        const userId = req.user.id;
+        let {courcename,courceDescription,whatYouWillLearn,price,category,tag,status,instructions} = req.body;
+        const thumbnail = req.files.thumbnailImage   
 
-        if(! courcename ||! courceDescription ||! whatYouWillLearn ||! price ||! tag ||!thumbnail){
+        if(! courcename ||! courceDescription ||! whatYouWillLearn ||! price ||! category ||!thumbnail||!tag){
             return res.status(400).json({
                 success:false,
                 message:"All Fields are rquired"
             })
         }
-        const userId = req.user.id;
+
 
         if(!status || status === undefined){
             status="Draft"
@@ -26,16 +27,16 @@ exports.CreateCOurces = async (req,res) => {
         if(!Finding){
             return res.status(404).json({
                 success:false,
-                message:"THe Useris not Found"
+                message:"The instrutor Details arre not Found"
             })
         }
 
 
-        const TagDetails = await Category.findById(tag);
+        const TagDetails = await Category.findById(category);
         if(!TagDetails){
             return res.status(404).json({
                 success:false,
-                message:"The tag is not Found "
+                message:"The category is not Found "
             })
         }
 
@@ -48,11 +49,13 @@ exports.CreateCOurces = async (req,res) => {
             whatYouWillLearn:whatYouWillLearn,
             price,
             tag:TagDetails._id,
-            thumbnail:thumbnailImage.secure_url
+            thumbnail:thumbnailImage.secure_url,
+            status:status,
+            instructions:instructions
         })
         console.log(newCources)
 
-        await User.findByIdandUpdate(
+        await User.findByIdAndUpdate(
             {_id:Finding._id},
             {
                 $push:{
@@ -61,7 +64,15 @@ exports.CreateCOurces = async (req,res) => {
             },
             {new:true}
         )
-
+        await Category.findByIdAndUpdate(
+			{ _id: category },
+			{
+				$push: {
+					course: newCources._id,
+				},
+			},
+			{ new: true }
+		);
         return res.status(200).json({
             success:true,
             message:"The Cource is been created"
@@ -78,20 +89,21 @@ exports.CreateCOurces = async (req,res) => {
 
 exports.ShowAllCources = async (req,res) => {
     try{
-        const allCOurces = await courc.find({},{courcename:true,
+        const allCOurces = await Course.find({},{courcename:true,
             price:true,
             thumbnail:true,
             instructor:true,
             ratingAndreviews:true,
-            studentsEnrolled:true
-            .populate('instructor')
-            .exec()
+            studentsEnrolled:true,
         })
+        .populate('instructor')
+        .exec()
 
         console.log(allCOurces);
         res.status(200).json({
             success:true,
-            message:"The data is been uploaded"
+            message:"The data is been uploaded",
+            allCOurces
         })
 
     }catch(error){
@@ -116,7 +128,7 @@ exports.GetCourcesDetails = async(req,res)=>{
         })
         .populate('category')
         .populate({
-            path:"CourceContent",
+            path:"courceContent",
             populate:{
                 path:"subSection"
             }
@@ -126,13 +138,13 @@ exports.GetCourcesDetails = async(req,res)=>{
         if(!CourseDetails){
             return res.status(400).json({
                 success:false,
-                message:`Could not find the course with ${courseId}`,
+                message:`Could not find the course with ${CourceId}`,
             });
         }
         return res.status(200).json({
             success:true,
             message:"Course Details fetched successfully",
-            data:courseDetails,
+            data:CourseDetails,
         })
     } catch (error) {
         console.log(error);
