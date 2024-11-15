@@ -1,6 +1,6 @@
 // Icons Import
 import { FaArrowRight } from "react-icons/fa"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 // Image and Video Import
 import Banner from "../assets/Images/banner.mp4"
@@ -16,6 +16,8 @@ import LearningLanguageSection from "../components/core/HomePage/LearningLanguag
 import TimelineSection from "../components/core/HomePage/Timeline"
 
 function Home() {
+  const location = useLocation()
+  console.log("Priniing the location",location)
   return (
     <div>
       {/* Section 1 */}

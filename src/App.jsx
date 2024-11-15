@@ -4,7 +4,7 @@ import "./App.css"
 import { useDispatch, useSelector } from "react-redux"
 // React Router
 import { Route, Routes, useNavigate } from "react-router-dom"
-
+// import{BASE_URL} from './services/apis'
 // Components
 import Navbar from "./components/Common/Navbar"
 import OpenRoute from "./components/core/Auth/OpenRoute"
@@ -47,7 +47,7 @@ function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
+  // console.log("This is the baseurl",BASE_URL)
   return (
     <div className="flex min-h-screen w-screen flex-col bg-richblack-900 font-inter">
       <Navbar />
