@@ -26,6 +26,7 @@ database.connect();
 app.use(express.json());
 app.use(cookieParser());
 app.use(userAgent.express())
+// app.use(Analytics.express())
 app.use(
 	cors({
 		origin: "*",
