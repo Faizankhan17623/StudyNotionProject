@@ -8,7 +8,6 @@ const { passwordUpdated } = require("../mail/templates/passwordUpdate")
 const {loginTemplate} = require('../mail/templates/loginTemplate')
 const Profile = require("../models/Profile")
 require("dotenv").config()
-const geoip = require("geoip-lite");
 // Signup Controller for Registering USers
 
 exports.signup = async (req, res) => {
@@ -166,15 +165,7 @@ exports.login = async (req, res) => {
       user.password = undefined
       // Set cookie for token and return success response
 
-      // Retrieve user's IP address
-    //   const ip =
-    //   req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.socket.remoteAddress;
-    //   // FetchipDat()
-    // // Fetch location using geoip-lite
-    // const geo = geoip.lookup(ip);
-    // console.log("The geolocation is ",geo)
-    // console.log("Thee ip is ",ip)
-
+    
       const emailContent = loginTemplate(email, ip, city,region,country ,timezone);
       try {
         await mailSender(email, "New Login Detected", emailContent);
