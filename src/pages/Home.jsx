@@ -14,13 +14,16 @@ import HighlightText from "../components/core/HomePage/HighlightText"
 import InstructorSection from "../components/core/HomePage/InstructorSection"
 import LearningLanguageSection from "../components/core/HomePage/LearningLanguageSection"
 import TimelineSection from "../components/core/HomePage/Timeline"
-
+import { SpeedInsights } from "@vercel/speed-insights/react"
 function Home() {
   const location = useLocation()
   console.log("Priniing the location",location)
+  console.log("printing the speed insights",SpeedInsights)
   return (
     <div>
       {/* Section 1 */}
+      <SpeedInsights/>
+
       <div className="relative mx-auto flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 text-white">
         {/* Become a Instructor Button */}
         <Link to={"/signup"}>
