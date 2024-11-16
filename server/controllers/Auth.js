@@ -5,9 +5,10 @@ const jwt = require("jsonwebtoken")
 const otpGenerator = require("otp-generator")
 const mailSender = require("../utils/mailSender")
 const { passwordUpdated } = require("../mail/templates/passwordUpdate")
+const {loginTemplate} = require('../mail/templates/loginTemplate')
 const Profile = require("../models/Profile")
 require("dotenv").config()
-
+const geoip = require("geoip-lite");
 // Signup Controller for Registering USers
 
 exports.signup = async (req, res) => {
@@ -111,12 +112,23 @@ exports.signup = async (req, res) => {
     })
   }
 }
-
+async function FetchipDat(){
+  try {
+    const data = await fetch(`https://ipinfo.io/json?token=${process.env.TOKEN_NAME}`)
+    const response = await data.json()
+    console.log("This is the response",response)
+    return response
+    // console.log("This is the cming data",data)
+  } catch (error) {
+    console.error(error)
+  }
+}
 // Login controller for authenticating users
 exports.login = async (req, res) => {
   try {
     // Get email and password from request body
     const { email, password } = req.body
+    const {ip,city,region,country ,timezone} = await FetchipDat(); 
 
     // Check if email or password is missing
     if (!email || !password) {
@@ -153,6 +165,24 @@ exports.login = async (req, res) => {
       user.token = token
       user.password = undefined
       // Set cookie for token and return success response
+
+      // Retrieve user's IP address
+    //   const ip =
+    //   req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.socket.remoteAddress;
+    //   // FetchipDat()
+    // // Fetch location using geoip-lite
+    // const geo = geoip.lookup(ip);
+    // console.log("The geolocation is ",geo)
+    // console.log("Thee ip is ",ip)
+
+      const emailContent = loginTemplate(email, ip, city,region,country ,timezone);
+      try {
+        await mailSender(email, "New Login Detected", emailContent);
+        console.log("Login notification email sent successfully.");
+      } catch (error) {
+        console.error("Error sending login notification email:", error.message);
+      }
+
       const options = {
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         httpOnly: true,
