@@ -1,7 +1,7 @@
 // Icons Import
 import { FaArrowRight } from "react-icons/fa"
 import { Link, useLocation } from "react-router-dom"
-
+import {Analytics} from '@vercel/analytics/react'
 // Image and Video Import
 import Banner from "../assets/Images/banner.mp4"
 // Component Imports
@@ -16,9 +16,9 @@ import LearningLanguageSection from "../components/core/HomePage/LearningLanguag
 import TimelineSection from "../components/core/HomePage/Timeline"
 import { SpeedInsights } from "@vercel/speed-insights/react"
 function Home() {
-  const location = useLocation()
-  console.log("Priniing the location",location)
-  console.log("printing the speed insights",SpeedInsights)
+  // const location = useLocation()
+  // console.log("Priniing the location",location)
+  // console.log("printing the speed insights",SpeedInsights)
   return (
     <div>
       {/* Section 1 */}
@@ -59,6 +59,8 @@ function Home() {
           </CTAButton>
         </div>
 
+<SpeedInsights/>
+<Analytics/>
         {/* Video */}
         <div className="mx-3 my-7 shadow-[10px_-5px_50px_-5px] shadow-blue-200">
           <video
