@@ -16,14 +16,14 @@ exports.createSubSection = async (req, res) => {
         .status(404)
         .json({ success: false, message: "All Fields are Required" })
     }
-    console.log(video)
+    // console.log(video)
 
     // Upload the video file to Cloudinary
     const uploadDetails = await uploadImageToCloudinary(
       video,
       process.env.FOLDER_NAME
     )
-    console.log(uploadDetails)
+    // console.log(uploadDetails)
     // Create a new sub-section with the necessary information
     const SubSectionDetails = await SubSection.create({
       title: title,
@@ -81,6 +81,29 @@ exports.updateSubSection = async (req, res) => {
       subSection.timeDuration = `${uploadDetails.duration}`
     }
 
+    // FEATURE-15: Upload a new resource file if provided
+    if (req.files && req.files.resourceFile && req.body.resourceTitle) {
+      const resourceUpload = await uploadImageToCloudinary(
+        req.files.resourceFile,
+        process.env.FOLDER_NAME,
+        undefined,
+        undefined,
+        "raw"
+      )
+      subSection.resources.push({
+        title: req.body.resourceTitle,
+        fileUrl: resourceUpload.secure_url,
+      })
+    }
+
+    // FEATURE-15: Remove a resource by index if requested
+    if (req.body.removeResourceIndex !== undefined) {
+      const idx = parseInt(req.body.removeResourceIndex)
+      if (!isNaN(idx) && idx >= 0 && idx < subSection.resources.length) {
+        subSection.resources.splice(idx, 1)
+      }
+    }
+
     await subSection.save()
 
     // find updated section and return it
@@ -88,7 +111,7 @@ exports.updateSubSection = async (req, res) => {
       "subSection"
     )
 
-    console.log("updated section", updatedSection)
+    // console.log("updated section", updatedSection)
 
     return res.json({
       success: true,

@@ -13,6 +13,7 @@ const {
   editCourse,
   getInstructorCourses,
   deleteCourse,
+  searchCourses,
 } = require("../controllers/Course")
 
 // Tags Controllers Import
@@ -43,10 +44,12 @@ const {
   createRating,
   getAverageRating,
   getAllRatingReview,
+  deleteReview,
 } = require("../controllers/RatingandReview")
 const {
   updateCourseProgress,
-  getProgressPercentage,
+  updateVideoTimestamp,
+  getVideoTimestamp,
 } = require("../controllers/courseProgress")
 // Importing Middlewares
 const { auth, isInstructor, isStudent, isAdmin } = require("../middleware/auth")
@@ -75,16 +78,21 @@ router.post("/addSubSection", auth, isInstructor, createSubSection)
 router.get("/getInstructorCourses", auth, isInstructor, getInstructorCourses)
 // Get all Registered Courses
 router.get("/getAllCourses", getAllCourses)
+// Search and filter courses
+router.get("/searchCourses", searchCourses)
 // Get Details for a Specific Courses
 router.post("/getCourseDetails", getCourseDetails)
 // Get Details for a Specific Courses
 router.post("/getFullCourseDetails", auth, getFullCourseDetails)
 // To Update Course Progress
 router.post("/updateCourseProgress", auth, isStudent, updateCourseProgress)
+// FEATURE-9: Video Resume — save/get timestamp
+router.post("/updateVideoTimestamp", auth, isStudent, updateVideoTimestamp)
+router.get("/getVideoTimestamp", auth, isStudent, getVideoTimestamp)
 // To get Course Progress
 // router.post("/getProgressPercentage", auth, isStudent, getProgressPercentage)
 // Delete a Course
-router.delete("/deleteCourse", deleteCourse)
+router.delete("/deleteCourse", auth, isInstructor, deleteCourse)
 
 // ********************************************************************************************************
 //                                      Category routes (Only by Admin)
@@ -101,5 +109,6 @@ router.post("/getCategoryPageDetails", categoryPageDetails)
 router.post("/createRating", auth, isStudent, createRating)
 router.get("/getAverageRating", getAverageRating)
 router.get("/getReviews", getAllRatingReview)
+router.delete("/deleteReview", auth, isAdmin, deleteReview)
 
 module.exports = router

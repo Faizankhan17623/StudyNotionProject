@@ -44,7 +44,7 @@ exports.capturePayment = async (req, res) => {
       // Add the price of the course to the total amount
       total_amount += course.price
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       return res.status(500).json({ success: false, message: error.message })
     }
   }
@@ -52,13 +52,13 @@ exports.capturePayment = async (req, res) => {
   const options = {
     amount: total_amount * 100,
     currency: "INR",
-    receipt: Math.random(Date.now()).toString(),
+    receipt: `receipt_${Date.now()}`,
   }
 
   try {
     // Initiate the payment using Razorpay
     const paymentResponse = await instance.orders.create(options)
-    console.log(paymentResponse)
+    // console.log(paymentResponse)
     res.json({
       success: true,
       data: paymentResponse,
@@ -131,7 +131,7 @@ exports.sendPaymentSuccessEmail = async (req, res) => {
       )
     )
   } catch (error) {
-    console.log("error in sending mail", error)
+    // console.log("error in sending mail", error)
     return res
       .status(400)
       .json({ success: false, message: "Could not send email" })
@@ -146,27 +146,32 @@ const enrollStudents = async (courses, userId, res) => {
       .json({ success: false, message: "Please Provide Course ID and User ID" })
   }
 
-  for (const courseId of courses) {
-    try {
+  const session = await mongoose.startSession()
+  session.startTransaction()
+
+  try {
+    for (const courseId of courses) {
       // Find the course and enroll the student in it
       const enrolledCourse = await Course.findOneAndUpdate(
         { _id: courseId },
         { $push: { studentsEnroled: userId } },
-        { new: true }
+        { new: true, session }
       )
 
       if (!enrolledCourse) {
+        await session.abortTransaction()
+        session.endSession()
         return res
           .status(500)
           .json({ success: false, error: "Course not found" })
       }
-      console.log("Updated course: ", enrolledCourse)
+      // console.log("Updated course: ", enrolledCourse)
 
-      const courseProgress = await CourseProgress.create({
-        courseID: courseId,
-        userId: userId,
-        completedVideos: [],
-      })
+      const [courseProgress] = await CourseProgress.create(
+        [{ courseID: courseId, userId: userId, completedVideos: [] }],
+        { session }
+      )
+
       // Find the student and add the course to their list of enrolled courses
       const enrolledStudent = await User.findByIdAndUpdate(
         userId,
@@ -176,10 +181,10 @@ const enrollStudents = async (courses, userId, res) => {
             courseProgress: courseProgress._id,
           },
         },
-        { new: true }
+        { new: true, session }
       )
 
-      console.log("Enrolled student: ", enrolledStudent)
+      // console.log("Enrolled student: ", enrolledStudent)
       // Send an email notification to the enrolled student
       const emailResponse = await mailSender(
         enrolledStudent.email,
@@ -190,10 +195,15 @@ const enrollStudents = async (courses, userId, res) => {
         )
       )
 
-      console.log("Email sent successfully: ", emailResponse.response)
-    } catch (error) {
-      console.log(error)
-      return res.status(400).json({ success: false, error: error.message })
+      // console.log("Email sent successfully: ", emailResponse.response)
     }
+
+    await session.commitTransaction()
+    session.endSession()
+  } catch (error) {
+    await session.abortTransaction()
+    session.endSession()
+    // console.log(error)
+    return res.status(400).json({ success: false, error: error.message })
   }
 }

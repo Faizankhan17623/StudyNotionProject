@@ -10,7 +10,7 @@
 	"keywords": [
 		"studynotion-backend"
 	],
-	"author": "Saikat Mukherjee",
+	"author": "Faizan khan",
 	"license": "ISC",
 	"dependencies": {
 		"@vercel/analytics": "^1.4.0",
@@ -23,13 +23,17 @@
 		"dotenv": "^16.0.3",
 		"express": "^4.18.2",
 		"express-fileupload": "^1.4.0",
+		"express-rate-limit": "^8.2.1",
 		"express-useragent": "^1.0.15",
 		"jsonwebtoken": "^9.0.0",
 		"mongoose": "^7.0.3",
+		"morgan": "^1.10.1",
 		"node-schedule": "^2.1.1",
 		"nodemailer": "^6.9.1",
 		"nodemon": "^2.0.22",
 		"otp-generator": "^4.0.1",
-		"razorpay": "^2.8.6"
+		"punycode": "^2.3.1",
+		"razorpay": "^2.8.6",
+		"userland": "^0.4.3"
 	}
 }

@@ -67,6 +67,12 @@ const userSchema = new mongoose.Schema(
         ref: "courseProgress",
       },
     ],
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
 
     // Add timestamps for when the document is created and last modified
   },

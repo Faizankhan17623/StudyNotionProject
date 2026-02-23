@@ -47,6 +47,58 @@ exports.updateCourseProgress = async (req, res) => {
   }
 }
 
+// FEATURE-9: Video Resume — save the current timestamp for a video
+exports.updateVideoTimestamp = async (req, res) => {
+  const { courseId, subsectionId, timestamp } = req.body
+  const userId = req.user.id
+
+  if (!courseId || !subsectionId || timestamp === undefined) {
+    return res.status(400).json({ success: false, message: "courseId, subsectionId, and timestamp are required" })
+  }
+
+  try {
+    const courseProgress = await CourseProgress.findOne({ courseID: courseId, userId })
+    if (!courseProgress) {
+      return res.status(404).json({ success: false, message: "Course progress not found" })
+    }
+
+    const existing = courseProgress.videoProgress.find(
+      (p) => p.subsectionId.toString() === subsectionId
+    )
+    if (existing) {
+      existing.timestamp = timestamp
+    } else {
+      courseProgress.videoProgress.push({ subsectionId, timestamp })
+    }
+    await courseProgress.save()
+
+    return res.status(200).json({ success: true, message: "Timestamp saved" })
+  } catch (error) {
+    console.error("updateVideoTimestamp error:", error)
+    return res.status(500).json({ success: false, message: "Internal server error" })
+  }
+}
+
+// FEATURE-9: Video Resume — get saved timestamp for a specific subsection
+exports.getVideoTimestamp = async (req, res) => {
+  const { courseId, subsectionId } = req.query
+  const userId = req.user.id
+
+  try {
+    const courseProgress = await CourseProgress.findOne({ courseID: courseId, userId })
+    if (!courseProgress) {
+      return res.status(200).json({ success: true, timestamp: 0 })
+    }
+    const entry = courseProgress.videoProgress.find(
+      (p) => p.subsectionId.toString() === subsectionId
+    )
+    return res.status(200).json({ success: true, timestamp: entry?.timestamp || 0 })
+  } catch (error) {
+    console.error("getVideoTimestamp error:", error)
+    return res.status(500).json({ success: false, message: "Internal server error" })
+  }
+}
+
 // exports.getProgressPercentage = async (req, res) => {
 //   const { courseId } = req.body
 //   const userId = req.user.id

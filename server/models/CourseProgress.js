@@ -15,6 +15,16 @@ const courseProgress = new mongoose.Schema({
       ref: "SubSection",
     },
   ],
+  // FEATURE-9: Video Resume — stores per-video watch position
+  videoProgress: [
+    {
+      subsectionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SubSection",
+      },
+      timestamp: { type: Number, default: 0 },
+    },
+  ],
 })
 
 module.exports = mongoose.model("courseProgress", courseProgress)

@@ -30,8 +30,8 @@ exports.createCourse = async (req, res) => {
     const tag = JSON.parse(_tag)
     const instructions = JSON.parse(_instructions)
 
-    console.log("tag", tag)
-    console.log("instructions", instructions)
+    // console.log("tag", tag)
+    // console.log("instructions", instructions)
 
     // Check if any of the required fields are missing
     if (
@@ -77,7 +77,7 @@ exports.createCourse = async (req, res) => {
       thumbnail,
       process.env.FOLDER_NAME
     )
-    console.log(thumbnailImage)
+    // console.log(thumbnailImage)
     // Create a new course with the given details
     const newCourse = await Course.create({
       courseName,
@@ -114,7 +114,7 @@ exports.createCourse = async (req, res) => {
       },
       { new: true }
     )
-    console.log("HEREEEEEEEE", categoryDetails2)
+    // console.log("HEREEEEEEEE", categoryDetails2)
     // Return the new course and a success message
     res.status(200).json({
       success: true,
@@ -144,7 +144,7 @@ exports.editCourse = async (req, res) => {
 
     // If Thumbnail Image is found, update it
     if (req.files) {
-      console.log("thumbnail update")
+      // console.log("thumbnail update")
       const thumbnail = req.files.thumbnailImage
       const thumbnailImage = await uploadImageToCloudinary(
         thumbnail,
@@ -221,7 +221,7 @@ exports.getAllCourses = async (req, res) => {
       data: allCourses,
     })
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     return res.status(404).json({
       success: false,
       message: `Can't Fetch Course Data`,
@@ -370,7 +370,7 @@ exports.getFullCourseDetails = async (req, res) => {
       userId: userId,
     })
 
-    console.log("courseProgressCount : ", courseProgressCount)
+    // console.log("courseProgressCount : ", courseProgressCount)
 
     if (!courseDetails) {
       return res.status(400).json({
@@ -411,6 +411,67 @@ exports.getFullCourseDetails = async (req, res) => {
       success: false,
       message: error.message,
     })
+  }
+}
+
+// Search and filter Published courses
+exports.searchCourses = async (req, res) => {
+  try {
+    const { q = "", category, priceType, minRating, sortBy = "relevance" } = req.query
+
+    let filter = { status: "Published" }
+
+    // Text search across name, description, and tags
+    if (q.trim()) {
+      filter.$or = [
+        { courseName: { $regex: q, $options: "i" } },
+        { courseDescription: { $regex: q, $options: "i" } },
+        { tag: { $in: [new RegExp(q, "i")] } },
+      ]
+    }
+
+    // Category filter
+    if (category) {
+      filter.category = category
+    }
+
+    // Price filter
+    if (priceType === "free") filter.price = 0
+    if (priceType === "paid") filter.price = { $gt: 0 }
+
+    // Sort option
+    let sortOption = { createdAt: -1 }
+    if (sortBy === "price-asc") sortOption = { price: 1 }
+    else if (sortBy === "price-desc") sortOption = { price: -1 }
+
+    let courses = await Course.find(filter)
+      .populate("instructor", "firstName lastName image")
+      .populate("ratingAndReviews")
+      .populate("category", "name")
+      .select(
+        "courseName courseDescription thumbnail instructor ratingAndReviews price studentsEnroled category createdAt tag"
+      )
+      .sort(sortOption)
+      .exec()
+
+    // Minimum rating filter (done after populate since rating is in sub-documents)
+    if (minRating) {
+      courses = courses.filter((course) => {
+        if (!course.ratingAndReviews.length) return false
+        const avg =
+          course.ratingAndReviews.reduce((sum, r) => sum + r.rating, 0) /
+          course.ratingAndReviews.length
+        return avg >= Number(minRating)
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: courses,
+      count: courses.length,
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message })
   }
 }
 

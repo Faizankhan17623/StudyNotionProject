@@ -5,6 +5,13 @@ const SubSectionSchema = new mongoose.Schema({
 	timeDuration: { type: String },
 	description: { type: String },
 	videoUrl: { type: String },
+	// FEATURE-15: Downloadable resources attached to this lesson
+	resources: [
+		{
+			title: { type: String, required: true },
+			fileUrl: { type: String, required: true },
+		},
+	],
 });
 
 module.exports = mongoose.model("SubSection", SubSectionSchema);

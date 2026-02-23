@@ -105,6 +105,29 @@ exports.getAverageRating = async (req, res) => {
   }
 }
 
+// Delete a review (Admin only)
+exports.deleteReview = async (req, res) => {
+  try {
+    const { reviewId } = req.body
+    if (!reviewId) {
+      return res.status(400).json({ success: false, message: "reviewId is required" })
+    }
+    const review = await RatingAndReview.findById(reviewId)
+    if (!review) {
+      return res.status(404).json({ success: false, message: "Review not found" })
+    }
+    // Remove the review reference from the course
+    await Course.findByIdAndUpdate(review.course, {
+      $pull: { ratingAndReviews: reviewId },
+    })
+    await RatingAndReview.findByIdAndDelete(reviewId)
+    return res.status(200).json({ success: true, message: "Review deleted successfully" })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: error.message })
+  }
+}
+
 // Get all rating and reviews
 exports.getAllRatingReview = async (req, res) => {
   try {

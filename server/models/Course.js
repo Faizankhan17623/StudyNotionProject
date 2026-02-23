@@ -49,12 +49,19 @@ const coursesSchema = new mongoose.Schema({
   instructions: {
     type: [String],
   },
+  language: {
+    type: String,
+    default: "English",
+  },
   status: {
     type: String,
     enum: ["Draft", "Published"],
   },
   createdAt: { type: Date, default: Date.now },
 })
+
+// Text index for search
+coursesSchema.index({ courseName: "text", courseDescription: "text", tag: "text" })
 
 // Export the Courses model
 module.exports = mongoose.model("Course", coursesSchema)
