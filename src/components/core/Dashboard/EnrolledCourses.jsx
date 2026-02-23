@@ -90,6 +90,14 @@ export default function EnrolledCourses() {
                   height="8px"
                   isLabelVisible={false}
                 />
+                {course.progressPercentage === 100 && (
+                  <button
+                    onClick={() => navigate(`/certificate/${course._id}`)}
+                    className="mt-1 w-fit rounded-md bg-yellow-50 px-3 py-1 text-xs font-bold text-richblack-900 hover:opacity-90"
+                  >
+                    Get Certificate
+                  </button>
+                )}
               </div>
             </div>
           ))}

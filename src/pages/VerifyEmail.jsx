@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 function VerifyEmail() {
   const [otp, setOtp] = useState("");
+  const [countdown, setCountdown] = useState(60);
   const { signupData, loading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -20,6 +21,20 @@ function VerifyEmail() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // 60-second countdown for resend cooldown
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [countdown]);
+
+  const handleResendOtp = () => {
+    dispatch(sendOtp(signupData.email));
+    setCountdown(60);
+  };
 
   const handleVerifyAndSignup = (e) => {
     e.preventDefault();
@@ -94,11 +109,16 @@ function VerifyEmail() {
               </p>
             </Link>
             <button
-              className="flex items-center text-blue-100 gap-x-2"
-              onClick={() => dispatch(sendOtp(signupData.email))}
+              className={`flex items-center gap-x-2 transition-colors ${
+                countdown > 0
+                  ? "cursor-not-allowed text-richblack-400"
+                  : "text-blue-100 hover:text-blue-50"
+              }`}
+              onClick={handleResendOtp}
+              disabled={countdown > 0}
             >
               <RxCountdownTimer />
-              Resend it
+              {countdown > 0 ? `Resend in ${countdown}s` : "Resend it"}
             </button>
           </div>
         </div>

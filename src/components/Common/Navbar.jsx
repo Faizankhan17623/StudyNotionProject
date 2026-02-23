@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AiOutlineMenu, AiOutlineShoppingCart } from "react-icons/ai"
 import { BsChevronDown } from "react-icons/bs"
+import { AiOutlineSearch, AiOutlineClose } from "react-icons/ai"
 import { useSelector } from "react-redux"
-import { Link, matchPath, useLocation } from "react-router-dom"
+import { Link, matchPath, useLocation, useNavigate } from "react-router-dom"
 
 import logo from "../../assets/Logo/Logo-Full-Light.png"
 import { NavbarLinks } from "../../data/navbar-links"
@@ -11,40 +12,26 @@ import { categories } from "../../services/apis"
 import { ACCOUNT_TYPE } from "../../utils/constants"
 import ProfileDropdown from "../core/Auth/ProfileDropdown"
 
-// const subLinks = [
-//   {
-//     title: "Python",
-//     link: "/catalog/python",
-//   },
-//   {
-//     title: "javascript",
-//     link: "/catalog/javascript",
-//   },
-//   {
-//     title: "web-development",
-//     link: "/catalog/web-development",
-//   },
-//   {
-//     title: "Android Development",
-//     link: "/catalog/Android Development",
-//   },
-// ];
 
 function Navbar() {
   const { token } = useSelector((state) => state.auth)
   const { user } = useSelector((state) => state.profile)
   const { totalItems } = useSelector((state) => state.cart)
   const location = useLocation()
+  const navigate = useNavigate()
 
   const [subLinks, setSubLinks] = useState([])
   const [loading, setLoading] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchInput, setSearchInput] = useState("")
+  const searchRef = useRef(null)
 
   useEffect(() => {
     ;(async () => {
       setLoading(true)
       try {
         const res = await apiConnector("GET", categories.CATEGORIES_API)
-        setSubLinks(res.data.data)
+        setSubLinks(res.data.data || [])
       } catch (error) {
         console.log("Could not fetch Categories.", error)
       }
@@ -57,6 +44,33 @@ function Navbar() {
   const matchRoute = (route) => {
     return matchPath({ path: route }, location.pathname)
   }
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter" && searchInput.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`)
+      setSearchOpen(false)
+      setSearchInput("")
+    }
+  }
+
+  const handleSearchSubmit = () => {
+    if (searchInput.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`)
+      setSearchOpen(false)
+      setSearchInput("")
+    }
+  }
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   return (
     <div
@@ -91,25 +105,21 @@ function Navbar() {
                           <p className="text-center">Loading...</p>
                         ) : subLinks.length ? (
                           <>
-                            {subLinks
-                              ?.filter(
-                                (subLink) => subLink?.courses?.length > 0
-                              )
-                              ?.map((subLink, i) => (
-                                <Link
-                                  to={`/catalog/${subLink.name
-                                    .split(" ")
-                                    .join("-")
-                                    .toLowerCase()}`}
-                                  className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50"
-                                  key={i}
-                                >
-                                  <p>{subLink.name}</p>
-                                </Link>
-                              ))}
+                            {subLinks?.map((subLink, i) => (
+                              <Link
+                                to={`/catalog/${subLink.name
+                                  .split(" ")
+                                  .join("-")
+                                  .toLowerCase()}`}
+                                className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50"
+                                key={i}
+                              >
+                                <p>{subLink.name}</p>
+                              </Link>
+                            ))}
                           </>
                         ) : (
-                          <p className="text-center">No Courses Found</p>
+                          <p className="text-center">No Categories Found</p>
                         )}
                       </div>
                     </div>
@@ -133,6 +143,33 @@ function Navbar() {
         </nav>
         {/* Login / Signup / Dashboard */}
         <div className="hidden items-center gap-x-4 md:flex">
+          {/* Search */}
+          <div ref={searchRef} className="relative flex items-center">
+            {searchOpen ? (
+              <div className="flex items-center gap-1 rounded-full border border-richblack-600 bg-richblack-700 px-3 py-1">
+                <input
+                  autoFocus
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={handleSearch}
+                  placeholder="Search courses..."
+                  className="w-48 bg-transparent text-sm text-richblack-5 placeholder-richblack-400 outline-none"
+                />
+                <button onClick={handleSearchSubmit}>
+                  <AiOutlineSearch className="text-lg text-richblack-100 hover:text-yellow-50" />
+                </button>
+                <button onClick={() => { setSearchOpen(false); setSearchInput("") }}>
+                  <AiOutlineClose className="text-lg text-richblack-400 hover:text-richblack-100" />
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setSearchOpen(true)} className="text-richblack-100 hover:text-yellow-50 transition-colors">
+                <AiOutlineSearch className="text-2xl" />
+              </button>
+            )}
+          </div>
+
           {user && user?.accountType !== ACCOUNT_TYPE.INSTRUCTOR && (
             <Link to="/dashboard/cart" className="relative">
               <AiOutlineShoppingCart className="text-2xl text-richblack-100" />

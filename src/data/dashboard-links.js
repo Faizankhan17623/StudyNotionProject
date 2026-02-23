@@ -42,4 +42,32 @@ export const sidebarLinks = [
     type: ACCOUNT_TYPE.STUDENT,
     icon: "VscArchive",
   },
+  {
+    id: 9,
+    name: "Wishlist",
+    path: "/dashboard/wishlist",
+    type: ACCOUNT_TYPE.STUDENT,
+    icon: "VscHeart",
+  },
+  {
+    id: 8,
+    name: "Create Category",
+    path: "/dashboard/create-category",
+    type: ACCOUNT_TYPE.ADMIN,
+    icon: "VscTag",
+  },
+  {
+    id: 10,
+    name: "Review Moderation",
+    path: "/dashboard/review-moderation",
+    type: ACCOUNT_TYPE.ADMIN,
+    icon: "VscComment",
+  },
+  {
+    id: 11,
+    name: "Maintenance",
+    path: "/dashboard/maintenance",
+    type: ACCOUNT_TYPE.ADMIN,
+    icon: "VscTools",
+  },
 ]

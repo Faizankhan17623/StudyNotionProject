@@ -1,13 +1,16 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
+import { FiDownload, FiFileText } from "react-icons/fi"
 
 import "video-react/dist/video-react.css"
 import { useLocation } from "react-router-dom"
 import { BigPlayButton, Player } from "video-react"
 
-import { markLectureAsComplete } from "../../../services/operations/courseDetailsAPI"
+import { markLectureAsComplete } from "../../../services/operations/courseAPI"
 import { updateCompletedLectures } from "../../../slices/viewCourseSlice"
+import { apiConnector } from "../../../services/apiConnector"
+import { courseEndpoints } from "../../../services/apis"
 import IconBtn from "../../Common/IconBtn"
 
 const VideoDetails = () => {
@@ -20,10 +23,14 @@ const VideoDetails = () => {
   const { courseSectionData, courseEntireData, completedLectures } =
     useSelector((state) => state.viewCourse)
 
-  const [videoData, setVideoData] = useState([])
+  const [videoData, setVideoData] = useState(null)
   const [previewSource, setPreviewSource] = useState("")
   const [videoEnded, setVideoEnded] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // FEATURE-9: Video Resume
+  const timestampSaveTimer = useRef(null)
+  const lastSavedTimestamp = useRef(0)
 
   useEffect(() => {
     ;(async () => {
@@ -31,55 +38,98 @@ const VideoDetails = () => {
       if (!courseId && !sectionId && !subSectionId) {
         navigate(`/dashboard/enrolled-courses`)
       } else {
-        // console.log("courseSectionData", courseSectionData)
         const filteredData = courseSectionData.filter(
           (course) => course._id === sectionId
         )
-        // console.log("filteredData", filteredData)
         const filteredVideoData = filteredData?.[0]?.subSection.filter(
           (data) => data._id === subSectionId
         )
-        // console.log("filteredVideoData", filteredVideoData)
         setVideoData(filteredVideoData[0])
         setPreviewSource(courseEntireData.thumbnail)
         setVideoEnded(false)
+        lastSavedTimestamp.current = 0
       }
     })()
   }, [courseSectionData, courseEntireData, location.pathname])
 
-  // check if the lecture is the first video of the course
+  // FEATURE-9: Fetch saved timestamp and seek to it on load
+  useEffect(() => {
+    if (!subSectionId || !courseId || !token) return
+    const loadTimestamp = async () => {
+      try {
+        const res = await apiConnector(
+          "GET",
+          `${courseEndpoints.GET_VIDEO_TIMESTAMP_API}?courseId=${courseId}&subsectionId=${subSectionId}`,
+          null,
+          { Authorization: `Bearer ${token}` }
+        )
+        if (res?.data?.success && res.data.timestamp > 5) {
+          setTimeout(() => {
+            playerRef.current?.seek(res.data.timestamp)
+          }, 800)
+        }
+      } catch {
+        // silently ignore
+      }
+    }
+    loadTimestamp()
+  }, [subSectionId, courseId])
+
+  // FEATURE-9: Save timestamp (debounced)
+  const saveTimestamp = useCallback(
+    async (currentTime) => {
+      if (Math.abs(currentTime - lastSavedTimestamp.current) < 5) return
+      lastSavedTimestamp.current = currentTime
+      try {
+        await apiConnector(
+          "POST",
+          courseEndpoints.UPDATE_VIDEO_TIMESTAMP_API,
+          { courseId, subsectionId: subSectionId, timestamp: currentTime },
+          { Authorization: `Bearer ${token}` }
+        )
+      } catch {
+        // silently ignore
+      }
+    },
+    [courseId, subSectionId, token]
+  )
+
+  // FEATURE-9: Subscribe to player state — save on pause
+  useEffect(() => {
+    if (!playerRef.current) return
+    const unsubscribe = playerRef.current.subscribeToStateChange((state) => {
+      if (state.paused && state.currentTime > 5 && !state.ended) {
+        clearTimeout(timestampSaveTimer.current)
+        timestampSaveTimer.current = setTimeout(() => {
+          saveTimestamp(state.currentTime)
+        }, 500)
+      }
+    })
+    return () => {
+      clearTimeout(timestampSaveTimer.current)
+      if (typeof unsubscribe === "function") unsubscribe()
+    }
+  }, [subSectionId, saveTimestamp])
+
   const isFirstVideo = () => {
     const currentSectionIndx = courseSectionData.findIndex(
       (data) => data._id === sectionId
     )
-
     const currentSubSectionIndx = courseSectionData[
       currentSectionIndx
     ].subSection.findIndex((data) => data._id === subSectionId)
-
-    if (currentSectionIndx === 0 && currentSubSectionIndx === 0) {
-      return true
-    } else {
-      return false
-    }
+    return currentSectionIndx === 0 && currentSubSectionIndx === 0
   }
 
-  // go to the next video
   const goToNextVideo = () => {
-    // console.log(courseSectionData)
-
     const currentSectionIndx = courseSectionData.findIndex(
       (data) => data._id === sectionId
     )
-
     const noOfSubsections =
       courseSectionData[currentSectionIndx].subSection.length
-
     const currentSubSectionIndx = courseSectionData[
       currentSectionIndx
     ].subSection.findIndex((data) => data._id === subSectionId)
-
-    // console.log("no of subsections", noOfSubsections)
 
     if (currentSubSectionIndx !== noOfSubsections - 1) {
       const nextSubSectionId =
@@ -99,37 +149,25 @@ const VideoDetails = () => {
     }
   }
 
-  // check if the lecture is the last video of the course
   const isLastVideo = () => {
     const currentSectionIndx = courseSectionData.findIndex(
       (data) => data._id === sectionId
     )
-
     const noOfSubsections =
       courseSectionData[currentSectionIndx].subSection.length
-
     const currentSubSectionIndx = courseSectionData[
       currentSectionIndx
     ].subSection.findIndex((data) => data._id === subSectionId)
-
-    if (
+    return (
       currentSectionIndx === courseSectionData.length - 1 &&
       currentSubSectionIndx === noOfSubsections - 1
-    ) {
-      return true
-    } else {
-      return false
-    }
+    )
   }
 
-  // go to the previous video
   const goToPrevVideo = () => {
-    // console.log(courseSectionData)
-
     const currentSectionIndx = courseSectionData.findIndex(
       (data) => data._id === sectionId
     )
-
     const currentSubSectionIndx = courseSectionData[
       currentSectionIndx
     ].subSection.findIndex((data) => data._id === subSectionId)
@@ -185,7 +223,6 @@ const VideoDetails = () => {
           src={videoData?.videoUrl}
         >
           <BigPlayButton position="center" />
-          {/* Render When Video Ends */}
           {videoEnded && (
             <div
               style={{
@@ -206,7 +243,6 @@ const VideoDetails = () => {
                 disabled={loading}
                 onclick={() => {
                   if (playerRef?.current) {
-                    // set the current time of the video to 0
                     playerRef?.current?.seek(0)
                     setVideoEnded(false)
                   }
@@ -240,10 +276,36 @@ const VideoDetails = () => {
       )}
 
       <h1 className="mt-4 text-3xl font-semibold">{videoData?.title}</h1>
-      <p className="pt-2 pb-6">{videoData?.description}</p>
+      <p className="pt-2 pb-4">{videoData?.description}</p>
+
+      {/* FEATURE-15: Downloadable Resources */}
+      {videoData?.resources?.length > 0 && (
+        <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-5">
+          <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-richblack-5">
+            <FiFileText className="text-yellow-50" />
+            Lecture Resources
+          </h3>
+          <div className="flex flex-col gap-2">
+            {videoData.resources.map((resource, idx) => (
+              <a
+                key={idx}
+                href={resource.fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between rounded-lg border border-richblack-600 bg-richblack-900 px-4 py-3 text-sm text-richblack-200 transition-colors hover:border-yellow-50 hover:text-yellow-50"
+              >
+                <span className="flex items-center gap-2">
+                  <FiFileText className="text-base" />
+                  {resource.title}
+                </span>
+                <FiDownload className="shrink-0 text-base" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export default VideoDetails
-// video

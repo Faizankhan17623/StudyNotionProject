@@ -3,16 +3,17 @@ import { BiInfoCircle } from "react-icons/bi"
 import { HiOutlineGlobeAlt } from "react-icons/hi"
 import { ReactMarkdown } from "react-markdown/lib/react-markdown"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, Link } from "react-router-dom"
 
 import ConfirmationModal from "../components/Common/ConfirmationModal"
 import Footer from "../components/Common/Footer"
 import RatingStars from "../components/Common/RatingStars"
+import { addToCart } from "../slices/cartSlice"
 import CourseAccordionBar from "../components/core/Course/CourseAccordionBar"
 import CourseDetailsCard from "../components/core/Course/CourseDetailsCard"
 import { formatDate } from "../services/formatDate"
-import { fetchCourseDetails } from "../services/operations/courseDetailsAPI"
-import { BuyCourse } from "../services/operations/studentFeaturesAPI"
+import { fetchCourseDetails } from "../services/operations/courseAPI"
+import { BuyCourse } from "../services/operations/paymentsAPI"
 import GetAvgRating from "../utils/avgRating"
 import Error from "./Error"
 
@@ -99,6 +100,7 @@ function CourseDetails() {
     instructor,
     studentsEnroled,
     createdAt,
+    language,
   } = response.data?.courseDetails
 
   const handleBuyCourse = () => {
@@ -156,7 +158,13 @@ function CourseDetails() {
               </div>
               <div>
                 <p className="">
-                  Created By {`${instructor.firstName} ${instructor.lastName}`}
+                  Created By{" "}
+                  <Link
+                    to={`/instructor/${instructor._id}`}
+                    className="text-blue-100 underline underline-offset-2 hover:text-yellow-50"
+                  >
+                    {`${instructor.firstName} ${instructor.lastName}`}
+                  </Link>
                 </p>
               </div>
               <div className="flex flex-wrap gap-5 text-lg">
@@ -166,7 +174,7 @@ function CourseDetails() {
                 </p>
                 <p className="flex items-center gap-2">
                   {" "}
-                  <HiOutlineGlobeAlt /> English
+                  <HiOutlineGlobeAlt /> {language || "English"}
                 </p>
               </div>
             </div>
@@ -177,7 +185,7 @@ function CourseDetails() {
               <button className="yellowButton" onClick={handleBuyCourse}>
                 Buy Now
               </button>
-              <button className="blackButton">Add to Cart</button>
+              <button className="blackButton" onClick={() => dispatch(addToCart(response?.data?.courseDetails))}>Add to Cart</button>
             </div>
           </div>
           {/* Courses Card */}
@@ -241,16 +249,23 @@ function CourseDetails() {
             <div className="mb-12 py-4">
               <p className="text-[28px] font-semibold">Author</p>
               <div className="flex items-center gap-4 py-4">
-                <img
-                  src={
-                    instructor.image
-                      ? instructor.image
-                      : `https://api.dicebear.com/5.x/initials/svg?seed=${instructor.firstName} ${instructor.lastName}`
-                  }
-                  alt="Author"
-                  className="h-14 w-14 rounded-full object-cover"
-                />
-                <p className="text-lg">{`${instructor.firstName} ${instructor.lastName}`}</p>
+                <Link to={`/instructor/${instructor._id}`}>
+                  <img
+                    src={
+                      instructor.image
+                        ? instructor.image
+                        : `https://api.dicebear.com/5.x/initials/svg?seed=${instructor.firstName} ${instructor.lastName}`
+                    }
+                    alt="Author"
+                    className="h-14 w-14 rounded-full object-cover ring-2 ring-transparent hover:ring-yellow-50 transition-all"
+                  />
+                </Link>
+                <Link
+                  to={`/instructor/${instructor._id}`}
+                  className="text-lg hover:text-yellow-50 hover:underline underline-offset-2"
+                >
+                  {`${instructor.firstName} ${instructor.lastName}`}
+                </Link>
               </div>
               <p className="text-richblack-50">
                 {instructor?.additionalDetails?.about}

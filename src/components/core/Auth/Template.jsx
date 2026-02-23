@@ -1,7 +1,8 @@
 import { FcGoogle } from "react-icons/fc"
 import { useSelector } from "react-redux"
-
+// assets/Images/frame.png
 import frameImg from "../../../assets/Images/frame.png"
+
 import LoginForm from "./LoginForm"
 import SignupForm from "./SignupForm"
 

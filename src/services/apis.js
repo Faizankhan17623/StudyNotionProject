@@ -1,4 +1,4 @@
-const BASE_URL = process.env.REACT_APP_BASE_URL
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL
 // AUTH ENDPOINTS
 export const endpoints = {
   SENDOTP_API: BASE_URL + "/auth/sendotp",
@@ -13,6 +13,11 @@ export const profileEndpoints = {
   GET_USER_DETAILS_API: BASE_URL + "/profile/getUserDetails",
   GET_USER_ENROLLED_COURSES_API: BASE_URL + "/profile/getEnrolledCourses",
   GET_INSTRUCTOR_DATA_API: BASE_URL + "/profile/instructorDashboard",
+  ADD_TO_WISHLIST_API: BASE_URL + "/profile/addToWishlist",
+  REMOVE_FROM_WISHLIST_API: BASE_URL + "/profile/removeFromWishlist",
+  GET_WISHLIST_API: BASE_URL + "/profile/getWishlist",
+  GET_CERTIFICATE_API: BASE_URL + "/profile/getCertificate",
+  GET_INSTRUCTOR_PROFILE_API: BASE_URL + "/profile/instructorProfile",
 }
 
 // STUDENTS ENDPOINTS
@@ -40,7 +45,12 @@ export const courseEndpoints = {
   GET_FULL_COURSE_DETAILS_AUTHENTICATED:
     BASE_URL + "/course/getFullCourseDetails",
   LECTURE_COMPLETION_API: BASE_URL + "/course/updateCourseProgress",
+  UPDATE_VIDEO_TIMESTAMP_API: BASE_URL + "/course/updateVideoTimestamp",
+  GET_VIDEO_TIMESTAMP_API: BASE_URL + "/course/getVideoTimestamp",
   CREATE_RATING_API: BASE_URL + "/course/createRating",
+  CREATE_CATEGORY_API: BASE_URL + "/course/createCategory",
+  SEARCH_COURSES_API: BASE_URL + "/course/searchCourses",
+  DELETE_REVIEW_API: BASE_URL + "/course/deleteReview",
 }
 
 // RATINGS AND REVIEWS
@@ -68,4 +78,11 @@ export const settingsEndpoints = {
   UPDATE_PROFILE_API: BASE_URL + "/profile/updateProfile",
   CHANGE_PASSWORD_API: BASE_URL + "/auth/changepassword",
   DELETE_PROFILE_API: BASE_URL + "/profile/deleteProfile",
+}
+
+// MAINTENANCE ENDPOINTS
+export const maintenanceEndpoints = {
+  GET_MAINTENANCE_STATUS_API: BASE_URL + "/maintenance/status",
+  SET_MAINTENANCE_API: BASE_URL + "/maintenance/set",
+  SEND_MAINTENANCE_NOTIFICATION_API: BASE_URL + "/maintenance/notify",
 }

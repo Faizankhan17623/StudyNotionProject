@@ -7,9 +7,7 @@ import { useParams } from "react-router-dom"
 import Footer from "../components/Common/Footer"
 import Course_Card from "../components/core/Catalog/Course_Card"
 import Course_Slider from "../components/core/Catalog/Course_Slider"
-import { apiConnector } from "../services/apiConnector"
-import { categories } from "../services/apis"
-import { getCatalogPageData } from "../services/operations/pageAndComponntDatas"
+import { fetchCourseCategories, getCatalogPageData } from "../services/operations/courseAPI"
 import Error from "./Error"
 
 function Catalog() {
@@ -22,10 +20,11 @@ function Catalog() {
   useEffect(() => {
     ;(async () => {
       try {
-        const res = await apiConnector("GET", categories.CATEGORIES_API)
-        const category_id = res?.data?.data?.filter(
-          (ct) => ct.name.split(" ").join("-").toLowerCase() === catalogName
-        )[0]._id
+        const allCategories = await fetchCourseCategories()
+        const category_id = allCategories
+          ?.filter(
+            (ct) => ct.name.split(" ").join("-").toLowerCase() === catalogName
+          )[0]._id
         setCategoryId(category_id)
       } catch (error) {
         console.log("Could not fetch Categories.", error)
@@ -108,16 +107,18 @@ function Catalog() {
         </div>
       </div>
       {/* Section 2 */}
-      <div className=" mx-auto box-content w-full max-w-maxContentTab px-4 py-12 lg:max-w-maxContent">
-        <div className="section_heading">
-          Top courses in {catalogPageData?.data?.differentCategory?.name}
+      {catalogPageData?.data?.differentCategory && (
+        <div className=" mx-auto box-content w-full max-w-maxContentTab px-4 py-12 lg:max-w-maxContent">
+          <div className="section_heading">
+            Top courses in {catalogPageData?.data?.differentCategory?.name}
+          </div>
+          <div className="py-8">
+            <Course_Slider
+              Courses={catalogPageData?.data?.differentCategory?.courses}
+            />
+          </div>
         </div>
-        <div className="py-8">
-          <Course_Slider
-            Courses={catalogPageData?.data?.differentCategory?.courses}
-          />
-        </div>
-      </div>
+      )}
 
       {/* Section 3 */}
       <div className=" mx-auto box-content w-full max-w-maxContentTab px-4 py-12 lg:max-w-maxContent">

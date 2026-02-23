@@ -1,7 +1,7 @@
 // Icons Import
 import { FaArrowRight } from "react-icons/fa"
 import { Link, useLocation } from "react-router-dom"
-import {Analytics} from '@vercel/analytics/react'
+// import {Analytics} from '@vercel/analytics/react'
 // Image and Video Import
 import Banner from "../assets/Images/banner.mp4"
 // Component Imports
@@ -14,7 +14,7 @@ import HighlightText from "../components/core/HomePage/HighlightText"
 import InstructorSection from "../components/core/HomePage/InstructorSection"
 import LearningLanguageSection from "../components/core/HomePage/LearningLanguageSection"
 import TimelineSection from "../components/core/HomePage/Timeline"
-import { SpeedInsights } from "@vercel/speed-insights/react"
+// import { SpeedInsights } from "@vercel/speed-insights/react"
 function Home() {
   // const location = useLocation()
   // console.log("Priniing the location",location)
@@ -22,7 +22,7 @@ function Home() {
   return (
     <div>
       {/* Section 1 */}
-      <SpeedInsights/>
+      {/* <SpeedInsights/> */}
 
       <div className="relative mx-auto flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 text-white">
         {/* Become a Instructor Button */}
@@ -59,8 +59,7 @@ function Home() {
           </CTAButton>
         </div>
 
-<SpeedInsights/>
-<Analytics/>
+{/* <Analytics/> */}
         {/* Video */}
         <div className="mx-3 my-7 shadow-[10px_-5px_50px_-5px] shadow-blue-200">
           <video
