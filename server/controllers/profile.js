@@ -159,7 +159,27 @@ exports.getEnrolledCourses = async (req, res) => {
         },
       })
       .exec()
+
+    if (!userDetails) {
+      return res.status(400).json({
+        success: false,
+        message: `Could not find user with id: ${userId}`,
+      })
+    }
+
     userDetails = userDetails.toObject()
+
+    // Fetch ALL course progress in ONE query instead of one per course inside the loop
+    const courseIds = userDetails.courses.map((c) => c._id)
+    const allProgress = await CourseProgress.find({
+      courseID: { $in: courseIds },
+      userId: userId,
+    })
+    const progressMap = {}
+    allProgress.forEach((p) => {
+      progressMap[p.courseID.toString()] = p.completedVideos?.length || 0
+    })
+
     var SubsectionLength = 0
     for (var i = 0; i < userDetails.courses.length; i++) {
       let totalDurationInSeconds = 0
@@ -174,11 +194,7 @@ exports.getEnrolledCourses = async (req, res) => {
         SubsectionLength +=
           userDetails.courses[i].courseContent[j].subSection.length
       }
-      let courseProgressCount = await CourseProgress.findOne({
-        courseID: userDetails.courses[i]._id,
-        userId: userId,
-      })
-      courseProgressCount = courseProgressCount?.completedVideos.length
+      const courseProgressCount = progressMap[userDetails.courses[i]._id.toString()] || 0
       if (SubsectionLength === 0) {
         userDetails.courses[i].progressPercentage = 100
       } else {
@@ -191,12 +207,6 @@ exports.getEnrolledCourses = async (req, res) => {
       }
     }
 
-    if (!userDetails) {
-      return res.status(400).json({
-        success: false,
-        message: `Could not find user with id: ${userDetails}`,
-      })
-    }
     return res.status(200).json({
       success: true,
       data: userDetails.courses,

@@ -62,6 +62,8 @@ const coursesSchema = new mongoose.Schema({
 
 // Text index for search
 coursesSchema.index({ courseName: "text", courseDescription: "text", tag: "text" })
+// Index: speeds up getAllCourses, getInstructorCourses
+coursesSchema.index({ status: 1, instructor: 1 })
 
 // Export the Courses model
 module.exports = mongoose.model("Course", coursesSchema)

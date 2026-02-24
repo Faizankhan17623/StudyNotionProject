@@ -21,24 +21,25 @@ const PORT = process.env.PORT || 4000;
 
 // Loading environment variables from .env file
 dotenv.config();
+
+// Trust Render/Vercel/Railway reverse proxy — required for express-rate-limit to work correctly
 app.set("trust proxy", 1);
+
 // Connecting to database
 database.connect();
 
 app.use(
 	cors({
-		origin: "*",
+		origin: "https://study-notion-project-swart.vercel.app",
 		credentials: true,
 	})
 );
- 
+
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
 app.use(userAgent.express())
 app.use(morgan("dev"));
-
-// app.use(Analytics.express())
 
 app.use(
 	fileUpload({

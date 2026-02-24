@@ -79,5 +79,8 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+// Index: speeds up login, signup, OTP lookups
+userSchema.index({ email: 1 })
+
 // Export the Mongoose model for the user schema, using the name "user"
 module.exports = mongoose.model("user", userSchema)
