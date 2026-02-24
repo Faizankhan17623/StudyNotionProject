@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 4000;
 
 // Loading environment variables from .env file
 dotenv.config();
-
+app.set("trust proxy", 1);
 // Connecting to database
 database.connect();
 
