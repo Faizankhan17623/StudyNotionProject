@@ -27,4 +27,7 @@ const courseProgress = new mongoose.Schema({
   ],
 })
 
+// Index: speeds up getEnrolledCourses, getFullCourseDetails, updateCourseProgress
+courseProgress.index({ courseID: 1, userId: 1 })
+
 module.exports = mongoose.model("courseProgress", courseProgress)
