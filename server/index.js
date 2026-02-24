@@ -27,7 +27,7 @@ database.connect();
 
 app.use(
 	cors({
-		origin: "*",
+		origin: "https://study-notion-project-swart.vercel.app",
 		credentials: true,
 	})
 );
