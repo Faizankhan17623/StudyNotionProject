@@ -17,7 +17,6 @@ const fileUpload = require("express-fileupload");
 const dotenv = require("dotenv");
 const userAgent = require('express-useragent')
 var morgan = require('morgan')
-const swaggerUi = require("swagger-ui-express");
 const { swaggerSpec } = require("./swagger");
 
 // Setting up port number
