@@ -1,6 +1,8 @@
 // Importing necessary modules and packages
 const express = require("express");
 const app = express();
+const swaggerUi = require("swagger-ui-express");
+const { swaggerSpec } = require("./swagger");
 const userRoutes = require("./routes/user");
 const profileRoutes = require("./routes/profile");
 const courseRoutes = require("./routes/Course");
@@ -15,6 +17,8 @@ const fileUpload = require("express-fileupload");
 const dotenv = require("dotenv");
 const userAgent = require('express-useragent')
 var morgan = require('morgan')
+const swaggerUi = require("swagger-ui-express");
+const { swaggerSpec } = require("./swagger");
 
 // Setting up port number
 const PORT = process.env.PORT || 4000;
@@ -30,7 +34,7 @@ database.connect();
 
 app.use(
 	cors({
-		origin: "https://study-notion-project-swart.vercel.app",
+		origin: "*",
 		credentials: true,
 	})
 );
@@ -65,6 +69,30 @@ app.get("/", (req, res) => {
 		success: true,
 		message: "Your server is up and running ...",
 	});
+});
+
+// Swagger API Documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+	customCss: `
+		.swagger-ui .topbar { display: none }
+		.swagger-ui .info .title { font-size: 2.5em; }
+	`,
+	customSiteTitle: "StudyNotion API Docs",
+}));
+
+// API Documentation JSON endpoint
+app.get("/api-docs.json", (req, res) => {
+	res.setHeader("Content-Type", "application/json");
+	res.send(swaggerSpec);
+});
+
+// Swagger API Documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// JSON endpoint for Swagger spec
+app.get("/api-docs.json", (req, res) => {
+	res.setHeader("Content-Type", "application/json");
+	res.send(swaggerSpec);
 });
 
 // Listening to the server
