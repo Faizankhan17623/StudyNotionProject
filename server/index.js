@@ -17,12 +17,6 @@ const fileUpload = require("express-fileupload");
 const dotenv = require("dotenv");
 const userAgent = require('express-useragent')
 var morgan = require('morgan')
-<<<<<<< HEAD
-// const swaggerUi = require("swagger-ui-express");
-// const { swaggerSpec } = require("./swagger");
-=======
->>>>>>> 0fbe2e6545cde603c4a9a23f4a598e77bfc484a0
-
 // Setting up port number
 const PORT = process.env.PORT || 4000;
 
@@ -84,15 +78,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 }));
 
 // API Documentation JSON endpoint
-app.get("/api-docs.json", (req, res) => {
-	res.setHeader("Content-Type", "application/json");
-	res.send(swaggerSpec);
-});
-
-// Swagger API Documentation
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-// JSON endpoint for Swagger spec
 app.get("/api-docs.json", (req, res) => {
 	res.setHeader("Content-Type", "application/json");
 	res.send(swaggerSpec);
