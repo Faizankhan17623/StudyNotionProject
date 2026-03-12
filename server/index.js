@@ -31,7 +31,10 @@ database.connect();
 
 app.use(
 	cors({
-		origin: "*",
+		 origin: [
+        "http://localhost:5173",
+        "https://study-notion-project-zeta-seven.vercel.app" 
+    ],
 		credentials: true,
 	})
 );
