@@ -20,6 +20,7 @@ import CreateCategory from "./components/core/Dashboard/Admin/CreateCategory"
 import ReviewModeration from "./components/core/Dashboard/Admin/ReviewModeration"
 import MaintenanceMode from "./components/core/Dashboard/Admin/MaintenanceMode"
 import MaintenanceBanner from "./components/Common/MaintenanceBanner"
+import AnnouncementTicker from "./components/Common/AnnouncementTicker"
 import Settings from "./components/core/Dashboard/Settings"
 import Wishlist from "./pages/Wishlist"
 import VideoDetails from "./components/core/ViewCourse/VideoDetails"
@@ -107,6 +108,8 @@ function App() {
 
   return (
     <div className="flex min-h-screen w-screen flex-col bg-richblack-900 font-inter">
+      {/* Announcement ticker — visible on every route */}
+      <AnnouncementTicker />
       {/* Admin-only maintenance banner — reminds admin that maintenance is still active */}
       {maintenanceData?.isActive && user?.accountType === ACCOUNT_TYPE.ADMIN && (
         <MaintenanceBanner data={maintenanceData} />
