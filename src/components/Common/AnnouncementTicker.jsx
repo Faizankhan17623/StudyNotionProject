@@ -1,5 +1,5 @@
 const MESSAGE =
-  "⚠️  Backend is currently closed for further updates — the app may take up to 30 seconds to wake up on first load. Please wait while it starts.  •  "
+  "🚀  Backend is currently closed until further changes are done — exciting new features & updates are on the way! Stay tuned.  •  "
 
 // Repeat the message so the ticker never shows a gap
 const REPEATED = MESSAGE.repeat(6)
