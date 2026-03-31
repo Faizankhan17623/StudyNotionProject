@@ -131,21 +131,35 @@ exports.deleteReview = async (req, res) => {
 // Get all rating and reviews
 exports.getAllRatingReview = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1) * limit
+
+    const totalReviews = await RatingAndReview.countDocuments({})
+
     const allReviews = await RatingAndReview.find({})
       .sort({ rating: "desc" })
+      .skip(skip)
+      .limit(limit)
       .populate({
         path: "user",
-        select: "firstName lastName email image", // Specify the fields you want to populate from the "Profile" model
+        select: "firstName lastName email image",
       })
       .populate({
         path: "course",
-        select: "courseName", //Specify the fields you want to populate from the "Course" model
+        select: "courseName",
       })
       .exec()
 
     res.status(200).json({
       success: true,
       data: allReviews,
+      pagination: {
+        totalReviews,
+        totalPages: Math.ceil(totalReviews / limit),
+        currentPage: page,
+        limit,
+      },
     })
   } catch (error) {
     console.error(error)

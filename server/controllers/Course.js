@@ -202,6 +202,12 @@ exports.editCourse = async (req, res) => {
 // Get Course List
 exports.getAllCourses = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1) * limit
+
+    const totalCourses = await Course.countDocuments({ status: "Published" })
+
     const allCourses = await Course.find(
       { status: "Published" },
       {
@@ -214,14 +220,21 @@ exports.getAllCourses = async (req, res) => {
       }
     )
       .populate("instructor")
+      .skip(skip)
+      .limit(limit)
       .exec()
 
     return res.status(200).json({
       success: true,
       data: allCourses,
+      pagination: {
+        totalCourses,
+        totalPages: Math.ceil(totalCourses / limit),
+        currentPage: page,
+        limit,
+      },
     })
   } catch (error) {
-    // console.log(error)
     return res.status(404).json({
       success: false,
       message: `Can't Fetch Course Data`,
@@ -478,18 +491,29 @@ exports.searchCourses = async (req, res) => {
 // Get a list of Course for a given Instructor
 exports.getInstructorCourses = async (req, res) => {
   try {
-    // Get the instructor ID from the authenticated user or request body
     const instructorId = req.user.id
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1) * limit
 
-    // Find all courses belonging to the instructor
+    const totalCourses = await Course.countDocuments({ instructor: instructorId })
+
     const instructorCourses = await Course.find({
       instructor: instructorId,
-    }).sort({ createdAt: -1 })
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
 
-    // Return the instructor's courses
     res.status(200).json({
       success: true,
       data: instructorCourses,
+      pagination: {
+        totalCourses,
+        totalPages: Math.ceil(totalCourses / limit),
+        currentPage: page,
+        limit,
+      },
     })
   } catch (error) {
     console.error(error)

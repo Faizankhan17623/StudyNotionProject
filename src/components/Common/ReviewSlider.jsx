@@ -25,7 +25,7 @@ function ReviewSlider() {
     ;(async () => {
       const { data } = await apiConnector(
         "GET",
-        ratingsEndpoints.REVIEWS_DETAILS_API
+        `${ratingsEndpoints.REVIEWS_DETAILS_API}?page=1&limit=15`
       )
       if (data?.success) {
         setReviews(data?.data)

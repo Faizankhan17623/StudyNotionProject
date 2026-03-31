@@ -31,15 +31,21 @@ const { CATALOGPAGEDATA_API } = catalogData
 //                                      Course Operations
 // ********************************************************************************************************
 
-export const getAllCourses = async () => {
+export const getAllCourses = async (page = 1, limit = 10) => {
   const toastId = toast.loading("Loading...")
-  let result = []
+  let result = { data: [], pagination: null }
   try {
-    const response = await apiConnector("GET", GET_ALL_COURSE_API)
+    const response = await apiConnector(
+      "GET",
+      `${GET_ALL_COURSE_API}?page=${page}&limit=${limit}`
+    )
     if (!response?.data?.success) {
       throw new Error("Could Not Fetch Course Categories")
     }
-    result = response?.data?.data
+    result = {
+      data: response?.data?.data,
+      pagination: response?.data?.pagination,
+    }
   } catch (error) {
     console.log("GET_ALL_COURSE_API API ERROR............", error)
     toast.error(error.message)
@@ -112,23 +118,25 @@ export const editCourseDetails = async (data, token) => {
   return result
 }
 
-export const fetchInstructorCourses = async (token) => {
-  let result = []
+export const fetchInstructorCourses = async (token, page = 1, limit = 10) => {
+  let result = { data: [], pagination: null }
   const toastId = toast.loading("Loading...")
   try {
     const response = await apiConnector(
       "GET",
-      GET_ALL_INSTRUCTOR_COURSES_API,
+      `${GET_ALL_INSTRUCTOR_COURSES_API}?page=${page}&limit=${limit}`,
       null,
       {
         Authorization: `Bearer ${token}`,
       }
     )
-    console.log("INSTRUCTOR COURSES API RESPONSE............", response)
     if (!response?.data?.success) {
       throw new Error("Could Not Fetch Instructor Courses")
     }
-    result = response?.data?.data
+    result = {
+      data: response?.data?.data,
+      pagination: response?.data?.pagination,
+    }
   } catch (error) {
     console.log("INSTRUCTOR COURSES API ERROR............", error)
     toast.error(error.message)

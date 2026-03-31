@@ -6,23 +6,31 @@ import { apiConnector } from "../../../../services/apiConnector"
 import { courseEndpoints, ratingsEndpoints } from "../../../../services/apis"
 import { toast } from "react-hot-toast"
 
+const REVIEWS_PER_PAGE = 10
+
 function ReviewModeration() {
   const { token } = useSelector((state) => state.auth)
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState(null)
 
   useEffect(() => {
-    fetchAllReviews()
+    fetchAllReviews(currentPage)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [currentPage])
 
-  const fetchAllReviews = async () => {
+  const fetchAllReviews = async (page) => {
     setLoading(true)
     try {
-      const response = await apiConnector("GET", ratingsEndpoints.REVIEWS_DETAILS_API)
+      const response = await apiConnector(
+        "GET",
+        `${ratingsEndpoints.REVIEWS_DETAILS_API}?page=${page}&limit=${REVIEWS_PER_PAGE}`
+      )
       if (response?.data?.success) {
         setReviews(response.data.data)
+        setPagination(response.data.pagination)
       }
     } catch (error) {
       toast.error("Could not fetch reviews")
@@ -41,7 +49,13 @@ function ReviewModeration() {
       )
       if (response?.data?.success) {
         toast.success("Review deleted")
-        setReviews((prev) => prev.filter((r) => r._id !== reviewId))
+        // Re-fetch current page; if it becomes empty go back one page
+        const updatedReviews = reviews.filter((r) => r._id !== reviewId)
+        if (updatedReviews.length === 0 && currentPage > 1) {
+          setCurrentPage((p) => p - 1)
+        } else {
+          fetchAllReviews(currentPage)
+        }
       } else {
         toast.error("Could not delete review")
       }
@@ -74,7 +88,7 @@ function ReviewModeration() {
         <div>
           <h1 className="text-3xl font-bold text-richblack-5">Review Moderation</h1>
           <p className="text-sm text-richblack-400">
-            {reviews.length} total reviews — delete spam or inappropriate reviews
+            {pagination ? pagination.totalReviews : reviews.length} total reviews — delete spam or inappropriate reviews
           </p>
         </div>
       </div>
@@ -137,6 +151,48 @@ function ReviewModeration() {
               </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className="rounded-md border border-richblack-600 px-4 py-2 text-sm text-richblack-100 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-richblack-700"
+          >
+            Previous
+          </button>
+
+          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
+            (page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`rounded-md px-4 py-2 text-sm ${
+                  page === currentPage
+                    ? "bg-yellow-50 font-semibold text-richblack-900"
+                    : "border border-richblack-600 text-richblack-100 hover:bg-richblack-700"
+                }`}
+              >
+                {page}
+              </button>
+            )
+          )}
+
+          <button
+            onClick={() =>
+              setCurrentPage((p) => Math.min(p + 1, pagination.totalPages))
+            }
+            disabled={currentPage === pagination.totalPages}
+            className="rounded-md border border-richblack-600 px-4 py-2 text-sm text-richblack-100 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-richblack-700"
+          >
+            Next
+          </button>
+
+          <span className="ml-2 text-sm text-richblack-400">
+            Page {currentPage} of {pagination.totalPages}
+          </span>
         </div>
       )}
     </div>
