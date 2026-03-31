@@ -12,16 +12,17 @@ export default function Instructor() {
   const [loading, setLoading] = useState(false)
   const [instructorData, setInstructorData] = useState(null)
   const [courses, setCourses] = useState([])
+  const [totalCoursesCount, setTotalCoursesCount] = useState(0)
 
   useEffect(() => {
     ;(async () => {
       setLoading(true)
       const instructorApiData = await getInstructorData(token)
-      const result = await fetchInstructorCourses(token)
-      console.log(instructorApiData)
+      const result = await fetchInstructorCourses(token, 1, 3)
       if (instructorApiData.length) setInstructorData(instructorApiData)
       if (result) {
-        setCourses(result)
+        setCourses(result.data)
+        setTotalCoursesCount(result.pagination?.totalCourses || 0)
       }
       setLoading(false)
     })()
@@ -70,7 +71,7 @@ export default function Instructor() {
                 <div>
                   <p className="text-lg text-richblack-200">Total Courses</p>
                   <p className="text-3xl font-semibold text-richblack-50">
-                    {courses.length}
+                    {totalCoursesCount}
                   </p>
                 </div>
                 <div>

@@ -18,7 +18,7 @@ import {
 import { COURSE_STATUS } from "../../../../utils/constants"
 import ConfirmationModal from "../../../Common/ConfirmationModal"
 
-export default function CoursesTable({ courses, setCourses }) {
+export default function CoursesTable({ courses, setCourses, currentPage, setCurrentPage }) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { token } = useSelector((state) => state.auth)
@@ -29,9 +29,13 @@ export default function CoursesTable({ courses, setCourses }) {
   const handleCourseDelete = async (courseId) => {
     setLoading(true)
     await deleteCourse({ courseId: courseId }, token)
-    const result = await fetchInstructorCourses(token)
+    const result = await fetchInstructorCourses(token, currentPage)
     if (result) {
-      setCourses(result)
+      setCourses(result.data)
+      // If we deleted the last course on this page, go back one page
+      if (result.data.length === 0 && currentPage > 1) {
+        setCurrentPage((p) => p - 1)
+      }
     }
     setConfirmationModal(null)
     setLoading(false)

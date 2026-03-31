@@ -1,5 +1,5 @@
 const MESSAGE =
-  "🚀  Backend is currently closed until further changes are done — exciting new features & updates are on the way! Stay tuned.  •  "
+  "🚨 Developer realized AWS isn't free (who knew?!). Backend taking a sabbatical until this broke coder gets a job. AWS says 'Pay me' — developer says '😐'. Send coffee & prayers! 🙏 Updates coming... probably... maybe... if money happens! 💸  •  "
 
 // Repeat the message so the ticker never shows a gap
 const REPEATED = MESSAGE.repeat(6)
