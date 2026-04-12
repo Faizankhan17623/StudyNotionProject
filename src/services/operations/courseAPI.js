@@ -2,7 +2,7 @@ import { toast } from "react-hot-toast"
 
 import { updateCompletedLectures } from "../../slices/viewCourseSlice"
 import { apiConnector } from "../apiConnector"
-import { catalogData, courseEndpoints } from "../apis"
+import { catalogData, courseEndpoints, questionEndpoints } from "../apis"
 
 const {
   GET_ALL_COURSE_API,
@@ -424,6 +424,102 @@ export const createRating = async (data, token) => {
   }
   toast.dismiss(toastId)
   return success
+}
+
+// ********************************************************************************************************
+//                                      Q&A Operations
+// ********************************************************************************************************
+
+export const getQuestionsForLecture = async (courseId, subsectionId, token, page = 1) => {
+  try {
+    const response = await apiConnector(
+      "GET",
+      `${questionEndpoints.GET_QUESTIONS_API}?courseId=${courseId}&subsectionId=${subsectionId}&page=${page}&limit=20`,
+      null,
+      { Authorization: `Bearer ${token}` }
+    )
+    if (!response?.data?.success) throw new Error("Could not fetch questions")
+    return response.data
+  } catch (error) {
+    console.log("GET_QUESTIONS_API ERROR:", error)
+    return { data: [], total: 0 }
+  }
+}
+
+export const askQuestion = async (data, token) => {
+  try {
+    const response = await apiConnector("POST", questionEndpoints.ASK_QUESTION_API, data, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) throw new Error("Could not post question")
+    return response.data.data
+  } catch (error) {
+    console.log("ASK_QUESTION_API ERROR:", error)
+    toast.error("Could not post question")
+    return null
+  }
+}
+
+export const answerQuestion = async (data, token) => {
+  try {
+    const response = await apiConnector("POST", questionEndpoints.ANSWER_QUESTION_API, data, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) throw new Error("Could not post answer")
+    return response.data.data
+  } catch (error) {
+    console.log("ANSWER_QUESTION_API ERROR:", error)
+    toast.error("Could not post answer")
+    return null
+  }
+}
+
+export const toggleUpvoteQuestion = async (questionId, token) => {
+  try {
+    const response = await apiConnector(
+      "PUT",
+      questionEndpoints.UPVOTE_QUESTION_API,
+      { questionId },
+      { Authorization: `Bearer ${token}` }
+    )
+    if (!response?.data?.success) throw new Error("Could not upvote")
+    return response.data
+  } catch (error) {
+    console.log("UPVOTE_QUESTION_API ERROR:", error)
+    return null
+  }
+}
+
+export const toggleDownvoteQuestion = async (questionId, token) => {
+  try {
+    const response = await apiConnector(
+      "PUT",
+      questionEndpoints.DOWNVOTE_QUESTION_API,
+      { questionId },
+      { Authorization: `Bearer ${token}` }
+    )
+    if (!response?.data?.success) throw new Error("Could not downvote")
+    return response.data
+  } catch (error) {
+    console.log("DOWNVOTE_QUESTION_API ERROR:", error)
+    return null
+  }
+}
+
+export const toggleResolveQuestion = async (questionId, token) => {
+  try {
+    const response = await apiConnector(
+      "PUT",
+      questionEndpoints.RESOLVE_QUESTION_API,
+      { questionId },
+      { Authorization: `Bearer ${token}` }
+    )
+    if (!response?.data?.success) throw new Error("Could not resolve")
+    return response.data
+  } catch (error) {
+    console.log("RESOLVE_QUESTION_API ERROR:", error)
+    return null
+  }
 }
 
 // ********************************************************************************************************

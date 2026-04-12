@@ -175,60 +175,41 @@ function App() {
         >
           {/* Route for all users */}
           <Route path="dashboard/my-profile" element={<MyProfile />} />
-          <Route path="dashboard/Settings" element={<Settings />} />
-          {/* Route only for Instructors */}
-          {user?.accountType === ACCOUNT_TYPE.INSTRUCTOR && (
-            <>
-              <Route path="dashboard/instructor" element={<Instructor />} />
-              <Route path="dashboard/my-courses" element={<MyCourses />} />
-              <Route path="dashboard/add-course" element={<AddCourse />} />
-              <Route
-                path="dashboard/edit-course/:courseId"
-                element={<EditCourse />}
-              />
-            </>
-          )}
-          {/* Route only for Students */}
-          {user?.accountType === ACCOUNT_TYPE.STUDENT && (
-            <>
-              <Route
-                path="dashboard/enrolled-courses"
-                element={<EnrolledCourses />}
-              />
-              <Route path="/dashboard/cart" element={<Cart />} />
-              <Route path="dashboard/wishlist" element={<Wishlist />} />
-            </>
-          )}
           <Route path="dashboard/settings" element={<Settings />} />
-          {/* Route only for Admin */}
-          {user?.accountType === ACCOUNT_TYPE.ADMIN && (
-            <>
-              <Route
-                path="dashboard/create-category"
-                element={
-                  <AdminRoute>
-                    <CreateCategory />
-                  </AdminRoute>
-                }
-              />
-              <Route
-                path="dashboard/review-moderation"
-                element={
-                  <AdminRoute>
-                    <ReviewModeration />
-                  </AdminRoute>
-                }
-              />
-              <Route
-                path="dashboard/maintenance"
-                element={
-                  <AdminRoute>
-                    <MaintenanceMode />
-                  </AdminRoute>
-                }
-              />
-            </>
-          )}
+          {/* Instructor routes */}
+          <Route path="dashboard/instructor" element={<Instructor />} />
+          <Route path="dashboard/my-courses" element={<MyCourses />} />
+          <Route path="dashboard/add-course" element={<AddCourse />} />
+          <Route path="dashboard/edit-course/:courseId" element={<EditCourse />} />
+          {/* Student routes */}
+          <Route path="dashboard/enrolled-courses" element={<EnrolledCourses />} />
+          <Route path="dashboard/cart" element={<Cart />} />
+          <Route path="dashboard/wishlist" element={<Wishlist />} />
+          {/* Admin routes */}
+          <Route
+            path="dashboard/create-category"
+            element={
+              <AdminRoute>
+                <CreateCategory />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="dashboard/review-moderation"
+            element={
+              <AdminRoute>
+                <ReviewModeration />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="dashboard/maintenance"
+            element={
+              <AdminRoute>
+                <MaintenanceMode />
+              </AdminRoute>
+            }
+          />
         </Route>
 
         {/* For the watching course lectures */}
@@ -239,27 +220,21 @@ function App() {
             </PrivateRoute>
           }
         >
-          {user?.accountType === ACCOUNT_TYPE.STUDENT && (
-            <>
-              <Route
-                path="view-course/:courseId/section/:sectionId/sub-section/:subSectionId"
-                element={<VideoDetails />}
-              />
-            </>
-          )}
+          <Route
+            path="view-course/:courseId/section/:sectionId/sub-section/:subSectionId"
+            element={<VideoDetails />}
+          />
         </Route>
 
         {/* FEATURE-2: Course completion certificate */}
-        {user?.accountType === ACCOUNT_TYPE.STUDENT && (
-          <Route
-            path="certificate/:courseId"
-            element={
-              <PrivateRoute>
-                <Certificate />
-              </PrivateRoute>
-            }
-          />
-        )}
+        <Route
+          path="certificate/:courseId"
+          element={
+            <PrivateRoute>
+              <Certificate />
+            </PrivateRoute>
+          }
+        />
 
         {/* 404 Page */}
         <Route path="*" element={<Error />} />
