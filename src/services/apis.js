@@ -86,3 +86,13 @@ export const maintenanceEndpoints = {
   SET_MAINTENANCE_API: BASE_URL + "/maintenance/set",
   SEND_MAINTENANCE_NOTIFICATION_API: BASE_URL + "/maintenance/notify",
 }
+
+// Q&A ENDPOINTS
+export const questionEndpoints = {
+  ASK_QUESTION_API: BASE_URL + "/course/askQuestion",
+  GET_QUESTIONS_API: BASE_URL + "/course/getQuestions",
+  ANSWER_QUESTION_API: BASE_URL + "/course/answerQuestion",
+  UPVOTE_QUESTION_API: BASE_URL + "/course/upvoteQuestion",
+  DOWNVOTE_QUESTION_API: BASE_URL + "/course/downvoteQuestion",
+  RESOLVE_QUESTION_API: BASE_URL + "/course/resolveQuestion",
+}

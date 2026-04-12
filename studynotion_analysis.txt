@@ -1,0 +1,623 @@
+================================================================================
+                     STUDYNOTION CODEBASE ANALYSIS
+                     Full-Stack Ed-Tech Platform
+================================================================================
+
+================================================================================
+1. ALL MAJOR FEATURES BUILT
+================================================================================
+
+CORE PLATFORM FEATURES
+-----------------------
+
+1.1 AUTHENTICATION SYSTEM
+  - Email + OTP signup (6-digit OTP, 5-minute TTL, auto-deleted from DB)
+  - Bcrypt password hashing (10 rounds)
+  - JWT-based login (24-hour tokens)
+  - HTTP-only cookie token storage
+  - IP geolocation login alerts (via ipinfo.io) — sends email with IP, city, region, country, timezone
+  - Password reset via email token (1-hour expiry, random 20-byte hex)
+  - Change password with old password validation
+  - OTP resend functionality from VerifyEmail page
+
+1.2 ROLE-BASED ACCESS CONTROL
+  - Three account types: Admin, Instructor, Student
+  - Instructors require admin approval (approved = false on signup)
+  - Separate dashboard UI for each role
+  - Role-specific route guards: PrivateRoute, OpenRoute, AdminRoute
+
+1.3 COURSE CREATION & MANAGEMENT (INSTRUCTOR)
+  - 3-step course creation wizard:
+      Step 1: Basic info (name, description, learning objectives, price, category, tags, instructions, thumbnail)
+      Step 2: Course builder (add sections, add sub-sections with videos)
+      Step 3: Preview and publish
+  - Draft/Published status system
+  - Edit all course fields at any time
+  - Upload course thumbnail to Cloudinary
+  - Organize course into Sections → Sub-sections (lecture videos)
+  - Delete course with cascading cleanup (removes all sections, subsections, unenrolls students)
+  - Instructor dashboard with per-course statistics: students enrolled, revenue generated
+  - Paginated instructor course list (sorted by newest first)
+
+1.4 VIDEO HOSTING & PLAYBACK
+  - Upload lecture videos to Cloudinary (auto duration extraction)
+  - Stream videos via video-react player in the browser
+  - Video duration stored as string in seconds
+  - Total course duration calculated from all subsections
+
+1.5 STUDENT ENROLLMENT & CART
+  - Add/remove courses to shopping cart
+  - Cart persists in localStorage
+  - Multi-course checkout in a single Razorpay payment
+  - Cart shows total price and total items
+  - Cannot enroll in same course twice (validated server-side)
+  - Upon successful payment, CourseProgress document is auto-created
+
+1.6 PAYMENT INTEGRATION (RAZORPAY)
+  - Multi-course purchase in single order
+  - Amount in paise (price × 100)
+  - Razorpay modal prefilled with user name and email
+  - Signature verification: HMAC-SHA256 of "order_id|payment_id" with secret
+  - MongoDB transaction for atomic enrollment (all courses or none)
+  - Payment success email sent to student
+  - Enrollment confirmation emails per course
+
+1.7 COURSE PROGRESS TRACKING
+  - Mark individual lectures as complete/incomplete
+  - Visual progress bar per course (completed / total subsections × 100)
+  - Progress displayed on enrolled courses page
+  - Progress fetched in a single aggregated query across all enrolled courses
+
+1.8 VIDEO RESUME (FEATURE-9)
+  - Saves video timestamp to DB every time a lecture is paused/navigated away
+  - On re-opening a lecture, fetches saved timestamp and resumes playback
+  - videoProgress array in CourseProgress: { subsectionId, timestamp (seconds) }
+  - Separate API endpoints: POST /updateVideoTimestamp, GET /getVideoTimestamp
+
+1.9 RATINGS & REVIEWS
+  - Student can rate (numeric) and review (text) a course only after enrollment
+  - One review per student per course (enforced server-side)
+  - Average rating via MongoDB aggregation pipeline ($avg)
+  - Paginated reviews list sorted by rating descending
+  - Star rating display component with partial star rendering
+
+1.10 COURSE COMPLETION CERTIFICATE (FEATURE-2)
+  - Certificate unlocks when all sub-sections are watched
+  - Certificate shows: student name, course name, instructor name, completion date, total lectures, certificate ID
+  - Dedicated certificate page at /certificate/:courseId
+  - Backend validates completion before issuing certificate data
+
+1.11 DOWNLOADABLE LECTURE RESOURCES (FEATURE-15)
+  - Instructor can attach downloadable resources (PDF, docs) to any sub-section
+  - Resources uploaded to Cloudinary ("raw" resource type for PDFs)
+  - Resources stored as array of { title, fileUrl } in SubSection model
+  - Resources can be added or removed by index when editing a sub-section
+  - Students can view and download resources from the video viewer page
+
+1.12 WISHLIST
+  - Students can add/remove courses to/from wishlist
+  - $addToSet prevents duplicate wishlist entries
+  - Dedicated wishlist dashboard page
+  - Wishlist state managed in Redux + synced to backend
+
+1.13 SEARCH & FILTERING
+  - Full-text search on courseName, courseDescription, and tags (MongoDB text index)
+  - Filter by: category, priceType (free/paid), minRating
+  - Sort by: relevance, price-asc, price-desc
+  - Dedicated search results page at /search
+
+1.14 CATEGORY/CATALOG SYSTEM
+  - Admin creates categories with name and description
+  - Catalog page per category at /catalog/:catalogName
+  - Category page shows: selected category courses, a random other category, top 10 best-selling courses
+  - Courses linked to categories by reference
+
+1.15 PUBLIC INSTRUCTOR PROFILE (FEATURE-10)
+  - Public page at /instructor/:instructorId (no login required)
+  - Shows: instructor bio, profile photo, all published courses
+  - Aggregated stats: totalStudents, avgRating, totalCourses, totalReviews
+  - View all courses by the instructor with thumbnails and enrollment counts
+
+1.16 ADMIN PANEL
+  - Create and manage course categories
+  - Review moderation: view all reviews, delete any review
+  - Maintenance mode control: set active flag, custom message, expected return time
+  - Send maintenance notification email blast to ALL registered users
+
+1.17 MAINTENANCE MODE SYSTEM
+  - Admin-controlled flag stored in Maintenance model in MongoDB
+  - App.jsx polls maintenance status every 5 minutes
+  - Non-admin users are auto-logged out when maintenance activates
+  - Shows full-screen maintenance page to non-admins
+  - Admin-only banner shows in dashboard when maintenance is active
+  - Auto-expires when returnAt timestamp passes
+  - sendMaintenanceNotification: bulk email to all users via Promise.allSettled
+
+1.18 ANNOUNCEMENT TICKER
+  - Scrolling announcement banner displayed globally across all pages
+  - AnnouncementTicker component rendered at the app level in App.jsx
+
+1.19 CONTACT FORM
+  - Public contact form with: email, firstname, lastname, message, phone number, country code
+  - Sends confirmation email to the user with submitted details
+  - Backend POST /api/v1/reach/contact endpoint
+
+1.20 PROFILE MANAGEMENT
+  - Edit: first name, last name, date of birth, gender, about/bio, contact number
+  - Upload/change profile picture (uploaded to Cloudinary)
+  - Change password (old password required)
+  - Delete account: cascades to delete Profile, unenroll from all courses, delete all CourseProgress, delete User document
+  - Default avatar auto-generated from user initials via Dicebear API if no photo uploaded
+
+
+================================================================================
+2. ALL THIRD-PARTY INTEGRATIONS
+================================================================================
+
+2.1 RAZORPAY (Payment Gateway)
+  - Package: razorpay (npm)
+  - Config file: /server/config/razorpay.js
+  - Env vars: RAZORPAY_KEY, RAZORPAY_SECRET
+  - Usage: Create orders, verify payment signatures
+  - Currency: INR (Indian Rupees), amount stored in paise
+  - Script loaded dynamically on frontend: https://checkout.razorpay.com/v1/checkout.js
+  - Logo: /src/assets/Logo/rzp_logo.png
+
+2.2 CLOUDINARY (Media Storage & CDN)
+  - Package: cloudinary (npm)
+  - Config file: /server/config/cloudinary.js
+  - Env vars: CLOUD_NAME, API_KEY, API_SECRET
+  - Used for: course thumbnails, lecture videos, profile pictures, resource files (PDFs)
+  - Resource types: "auto" for images/videos, "raw" for PDF/document files
+  - Returns: secure_url (for serving), duration (for videos)
+  - Optional height/quality params for image uploads
+
+2.3 NODEMAILER (Email Service)
+  - Package: nodemailer (npm)
+  - Utility file: /server/utils/mailSender.js
+  - Env vars: MAIL_HOST, MAIL_USER, MAIL_PASS
+  - Sender name: "Studynotion | CodeHelp"
+  - HTML email templates used for all transactional emails
+
+2.4 IPINFO.IO (IP Geolocation)
+  - Used in: /server/controllers/Auth.js → login()
+  - Fetches user's IP location data (city, region, country, timezone) on login
+  - Data included in "New Login Detected" alert email
+  - No npm package — direct HTTP fetch using axios
+
+2.5 DICEBEAR (Avatar Generation)
+  - URL: https://api.dicebear.com/5.x/initials/svg?seed={firstName}+{lastName}
+  - Used as default profile picture when user has no uploaded photo
+  - Called in login() and getUserDetails() in frontend services
+
+2.6 VERCEL ANALYTICS
+  - Package: @vercel/analytics
+  - Imported in main.jsx or App.jsx
+  - Tracks page views and user interactions
+
+2.7 VERCEL SPEED INSIGHTS
+  - Package: @vercel/speed-insights
+  - Imported alongside analytics
+  - Monitors Core Web Vitals
+
+2.8 SWAGGER (API Documentation)
+  - Set up in /server/index.js
+  - Available for API documentation browsing
+
+2.9 EXPRESS-RATE-LIMIT (Rate Limiting)
+  - Package: express-rate-limit
+  - Applied on auth routes:
+      Login/Signup: 5 requests per 15 minutes
+      OTP/Reset: 3 requests per 15 minutes
+
+2.10 MORGAN (HTTP Logging)
+  - Package: morgan
+  - Applied as middleware in /server/index.js
+  - Logs all incoming HTTP requests to console
+
+2.11 EXPRESS-USERAGENT (User Agent Detection)
+  - Package: express-useragent
+  - Applied in /server/index.js
+  - Parses user agent strings from requests
+
+
+================================================================================
+3. AUTHENTICATION AND SECURITY IMPLEMENTATIONS
+================================================================================
+
+3.1 OTP EMAIL VERIFICATION
+  - Signup requires email OTP verification before account creation
+  - OTP: 6-digit numeric string (no letters/special chars)
+  - OTP document auto-deletes after 5 minutes (MongoDB TTL index on createdAt)
+  - OTP is sent automatically via Mongoose pre-save hook on OTP model
+  - On signup, OTP is verified against the most recently created OTP for that email
+
+3.2 PASSWORD SECURITY
+  - Passwords hashed with bcrypt, salt rounds: 10
+  - Plain-text passwords never stored
+  - Password comparison uses bcrypt.compare()
+  - Old password required to change password (prevents session hijacking)
+  - Password reset flow:
+      1. User submits email → backend generates crypto.randomBytes(20).toString("hex") token
+      2. Token + 1-hour expiry stored in User document
+      3. Email sent with link: {FRONTEND_URL}update-password/{token}
+      4. Token cleared from DB after successful password reset
+
+3.3 JWT AUTHENTICATION
+  - JWT signed with JWT_SECRET env var
+  - Expiration: 24 hours ("24h" in options)
+  - Token stored in: HTTP-only cookie AND localStorage (frontend)
+  - Token extracted from: req.cookies.token → req.body.token → Authorization header (fallback chain)
+  - Verified on every protected route via auth middleware
+
+3.4 ROLE-BASED AUTHORIZATION
+  Backend middleware in /server/middleware/auth.js:
+    - auth(): verifies JWT, attaches decoded user to req.user
+    - isStudent(): checks req.user.accountType === "Student"
+    - isInstructor(): checks req.user.accountType === "Instructor"
+    - isAdmin(): checks req.user.accountType === "Admin"
+
+  Frontend route guards:
+    - PrivateRoute: redirects unauthenticated users to /login
+    - OpenRoute: redirects authenticated users to /dashboard/my-profile
+    - AdminRoute: redirects non-admins
+
+3.5 RATE LIMITING
+  - express-rate-limit applied on authentication routes
+  - Login/Signup: max 5 requests per 15-minute window
+  - OTP send/Reset password token: max 3 requests per 15-minute window
+  - Configured to trust reverse proxies (for deployment behind Nginx/Vercel)
+
+3.6 LOGIN ANOMALY DETECTION
+  - On every login, backend fetches user's IP geolocation from ipinfo.io
+  - Sends HTML email to user's email address with:
+      - IP address
+      - City, region, country
+      - Timezone
+      - Prompt to change password if login wasn't them
+
+3.7 INSTRUCTOR APPROVAL SYSTEM
+  - New instructor accounts set approved = false on signup
+  - Admin must manually approve instructors (implied by the field; no dedicated approval endpoint visible in code)
+  - Students set approved = true automatically
+
+3.8 PAYMENT SIGNATURE VERIFICATION
+  - Razorpay payment verified server-side (not trusted from client)
+  - Verification: HMAC-SHA256(razorpay_order_id + "|" + razorpay_payment_id, RAZORPAY_SECRET)
+  - Compared against razorpay_signature from client
+  - Enrollment only proceeds if signatures match
+
+3.9 MONGODB TRANSACTION FOR ENROLLMENT
+  - Enrollment uses MongoDB session + transaction
+  - All course enrollments in a single purchase are atomic
+  - Rolls back all changes if any enrollment fails
+
+3.10 CORS CONFIGURATION
+  - Allowed origins: http://localhost:3000, http://localhost:5173, and production Vercel domain
+  - Credentials: true (allows cookies cross-origin)
+
+3.11 ACCOUNT DELETION DATA CLEANUP
+  - Deletes the user's Profile document
+  - Unenrolls user from all enrolled courses (removes from studentsEnroled arrays)
+  - Deletes all CourseProgress documents for the user
+  - Deletes the User document itself
+
+3.12 REVIEW INTEGRITY
+  - Server enforces one review per student per course
+  - Student must be enrolled in course to review it
+  - Reviews can be deleted by admin only (review moderation)
+
+
+================================================================================
+4. DATABASE SCHEMAS AND THEIR RELATIONSHIPS
+================================================================================
+
+4.1 USER SCHEMA (/server/models/User.js)
+  Fields:
+    - firstName: String (required, trim)
+    - lastName: String (required, trim)
+    - email: String (required, unique, trim)
+    - password: String (required)
+    - accountType: Enum ["Admin", "Student", "Instructor"] (required)
+    - active: Boolean (default: true)
+    - approved: Boolean (default: true; false for instructors)
+    - additionalDetails: ObjectId → ref: Profile (required)
+    - courses: [ObjectId] → ref: Course
+    - courseProgress: [ObjectId] → ref: CourseProgress
+    - wishlist: [ObjectId] → ref: Course
+    - image: String (URL)
+    - token: String (password reset token)
+    - resetPasswordExpires: Date
+  Indexes: email
+
+4.2 OTP SCHEMA (/server/models/OTP.js)
+  Fields:
+    - email: String (required)
+    - otp: String (required)
+    - createdAt: Date (default: Date.now)
+  TTL Index: createdAt expires after 300 seconds (5 minutes)
+  Pre-save hook: sends verification email before saving
+
+4.3 PROFILE SCHEMA (/server/models/Profile.js)
+  Fields:
+    - gender: String
+    - dateOfBirth: String
+    - about: String (trim)
+    - contactNumber: Number
+
+4.4 COURSE SCHEMA (/server/models/Course.js)
+  Fields:
+    - courseName: String (required)
+    - courseDescription: String (required)
+    - instructor: ObjectId → ref: User (required)
+    - whatYouWillLearn: String (required)
+    - courseContent: [ObjectId] → ref: Section
+    - ratingAndReviews: [ObjectId] → ref: RatingAndReview
+    - price: Number (required)
+    - thumbnail: String
+    - tag: [String] (required)
+    - category: ObjectId → ref: Category
+    - studentsEnroled: [ObjectId] → ref: User
+    - instructions: [String]
+    - language: String (default: "English")
+    - status: Enum ["Draft", "Published"]
+    - createdAt: Date (default: Date.now)
+    - sold: Number (default: 0) — used for top-selling sort
+  Indexes:
+    - Text index: { courseName: "text", courseDescription: "text", tag: "text" }
+    - Compound index: { status: 1, instructor: 1 }
+
+4.5 CATEGORY SCHEMA (/server/models/Category.js)
+  Fields:
+    - name: String (required, enum of valid categories)
+    - description: String (required)
+    - courses: [ObjectId] → ref: Course
+
+4.6 SECTION SCHEMA (/server/models/Section.js)
+  Fields:
+    - sectionName: String (required)
+    - subSection: [ObjectId] → ref: SubSection
+
+4.7 SUBSECTION SCHEMA (/server/models/Subsection.js)
+  Fields:
+    - title: String (required)
+    - timeDuration: String (video length in seconds, stored as string)
+    - description: String
+    - videoUrl: String (Cloudinary URL)
+    - resources: [{ title: String, fileUrl: String }] (downloadable attachments)
+
+4.8 RATING AND REVIEW SCHEMA (/server/models/RatingandReview.js)
+  Fields:
+    - user: ObjectId → ref: User
+    - rating: Number (required)
+    - review: String (required)
+    - course: ObjectId → ref: Course (indexed)
+  Indexes: course
+
+4.9 COURSE PROGRESS SCHEMA (/server/models/CourseProgress.js)
+  Fields:
+    - courseID: ObjectId → ref: Course
+    - userId: ObjectId → ref: User
+    - completedVideos: [ObjectId] → ref: SubSection
+    - videoProgress: [{
+        subsectionId: ObjectId → ref: SubSection,
+        timestamp: Number (seconds)
+      }]
+  Indexes: Compound index { courseID: 1, userId: 1 }
+
+4.10 MAINTENANCE SCHEMA (/server/models/Maintenance.js)
+  Fields:
+    - isActive: Boolean (default: false)
+    - message: String (default: "We are currently under maintenance")
+    - returnAt: Date
+    - updatedBy: ObjectId → ref: User
+
+ENTITY RELATIONSHIP DIAGRAM:
+  User (1) ──────────────── (1) Profile           [additionalDetails]
+  User (1) ──────────────── (N) Course             [enrolled: courses[]]
+  User (1) ──────────────── (N) CourseProgress     [courseProgress[]]
+  User (1) ──────────────── (N) Course             [wishlist[]]
+  User (1) ──────────────── (N) Course             [instructor field on Course]
+  Course (1) ─────────────── (N) Section           [courseContent[]]
+  Course (1) ─────────────── (N) RatingAndReview   [ratingAndReviews[]]
+  Course (N) ─────────────── (1) Category          [category field on Course]
+  Course (N) ─────────────── (N) User              [studentsEnroled[]]
+  Section (1) ────────────── (N) SubSection        [subSection[]]
+  SubSection (1) ──────────── (N) Resource         [embedded resources[]]
+  CourseProgress (N) ────────── (1) Course         [courseID]
+  CourseProgress (N) ────────── (1) User           [userId]
+  CourseProgress (1) ──────────── (N) SubSection   [completedVideos[]]
+  RatingAndReview (N) ────────── (1) User          [user]
+  RatingAndReview (N) ────────── (1) Course        [course]
+  Category (1) ────────────── (N) Course           [courses[]]
+  Maintenance (N) ─────────── (1) User             [updatedBy]
+
+
+================================================================================
+5. API ENDPOINTS AND THEIR PURPOSE
+================================================================================
+
+BASE URL: /api/v1
+
+5.1 AUTH ROUTES (/api/v1/auth)
+  POST   /login                 - Authenticate user, return JWT (rate limited: 5/15min)
+  POST   /signup                - Create new account with OTP verification (rate limited: 5/15min)
+  POST   /sendotp               - Send 6-digit OTP to email (rate limited: 3/15min)
+  POST   /changepassword        - Change password (requires: auth)
+  POST   /reset-password-token  - Send password reset email (rate limited: 3/15min)
+  POST   /reset-password        - Reset password with token (rate limited: 5/15min)
+
+5.2 PROFILE ROUTES (/api/v1/profile)
+  DELETE /deleteProfile                  - Delete user account + all data (auth + student)
+  PUT    /updateProfile                  - Update personal info: name, DOB, gender, bio, phone (auth)
+  GET    /getUserDetails                 - Fetch full user object with populated profile (auth)
+  GET    /getEnrolledCourses             - Fetch all enrolled courses with progress percentages (auth)
+  PUT    /updateDisplayPicture           - Upload new profile picture to Cloudinary (auth)
+  GET    /instructorDashboard            - Get instructor's courses with stats (auth + instructor)
+  POST   /addToWishlist                  - Add course to wishlist (auth + student)
+  DELETE /removeFromWishlist             - Remove course from wishlist (auth + student)
+  GET    /getWishlist                    - Fetch wishlist courses (auth + student)
+  GET    /getCertificate/:courseId       - Get certificate data if all videos watched (auth + student)
+  GET    /instructorProfile/:instructorId - Public instructor profile + stats (public)
+
+5.3 COURSE ROUTES (/api/v1/course)
+  POST   /createCourse           - Create new course with thumbnail upload (auth + instructor)
+  POST   /editCourse             - Edit existing course (auth + instructor)
+  GET    /getAllCourses           - Paginated list of published courses (public)
+  GET    /searchCourses          - Text search + filter courses (public)
+  POST   /getCourseDetails       - Full course info (no video URLs) for course details page (public)
+  POST   /getFullCourseDetails   - Full course info WITH video URLs (auth)
+  GET    /getInstructorCourses   - Paginated list of instructor's courses (auth + instructor)
+  DELETE /deleteCourse           - Delete course + all sections/subsections (auth + instructor)
+  POST   /addSection             - Add section to a course (auth + instructor)
+  POST   /updateSection          - Update section name (auth + instructor)
+  POST   /deleteSection          - Delete section + all subsections (auth + instructor)
+  POST   /addSubSection          - Add sub-section with video upload (auth + instructor)
+  POST   /updateSubSection       - Update sub-section; optionally upload resource files (auth + instructor)
+  POST   /deleteSubSection       - Delete sub-section from section (auth + instructor)
+  POST   /updateCourseProgress   - Mark a sub-section as watched (auth + student)
+  POST   /updateVideoTimestamp   - Save video playback position for resume (auth + student)
+  GET    /getVideoTimestamp      - Get saved video position for a sub-section (auth + student)
+  POST   /createCategory         - Create new course category (auth + admin)
+  GET    /showAllCategories      - List all categories (public)
+  POST   /getCategoryPageDetails - Get courses for a category page (public)
+  POST   /createRating           - Submit course rating and review (auth + student)
+  GET    /getAverageRating       - Get average rating for a course (public)
+  GET    /getReviews             - Paginated list of all reviews (public)
+  DELETE /deleteReview           - Delete a review (auth + admin)
+
+5.4 PAYMENT ROUTES (/api/v1/payment)
+  POST   /capturePayment            - Create Razorpay order for course purchase (auth + student)
+  POST   /verifyPayment             - Verify Razorpay signature and enroll student (auth + student)
+  POST   /sendPaymentSuccessEmail   - Send payment receipt email (auth + student)
+
+5.5 CONTACT ROUTES (/api/v1/reach)
+  POST   /contact   - Submit contact form, send confirmation email (public)
+
+5.6 MAINTENANCE ROUTES (/api/v1/maintenance)
+  GET    /status   - Check maintenance mode status (public)
+  POST   /set      - Set maintenance mode on/off with message (auth + admin)
+  POST   /notify   - Send maintenance notification email to all users (auth + admin)
+
+
+================================================================================
+6. KEY TECHNICAL DECISIONS AND ARCHITECTURE
+================================================================================
+
+6.1 OVERALL ARCHITECTURE
+  - Monorepo structure: /server (backend) + /src (frontend) in same repository
+  - Backend: REST API with Express.js on Node.js
+  - Frontend: React SPA (Single Page Application) with Vite as build tool
+  - Database: MongoDB with Mongoose ODM
+  - Deployment: Vercel (inferred from CORS config and @vercel/analytics usage)
+  - Media Storage: Cloudinary (all binary assets stored externally, not on server)
+
+6.2 STATE MANAGEMENT DECISION
+  - Redux Toolkit chosen over Context API for global state
+  - 6 slices: auth, profile, course, cart, viewCourse, wishlist
+  - Cart and token persisted to localStorage for page refresh survival
+  - Wishlist state synced to backend (not just local)
+
+6.3 AUTHENTICATION STRATEGY
+  - JWT stored in BOTH HTTP-only cookie (secure) AND localStorage (for frontend reads)
+  - This dual storage enables client-side access to token for API calls while the cookie provides CSRF protection
+  - JWT expiry: 24 hours (balance between UX and security)
+  - Token passed via custom hook that checks cookies first, then body, then Authorization header
+
+6.4 MEDIA UPLOAD STRATEGY
+  - All media (videos, images, PDFs) uploaded to Cloudinary, not stored on the Express server
+  - express-fileupload middleware with useTempFiles: true stores temp files on disk during upload
+  - Cloudinary "raw" resource type for non-media files (PDFs/docs)
+  - Video duration automatically extracted by Cloudinary during upload
+
+6.5 PAYMENT ARCHITECTURE
+  - Two-phase payment: (1) create order on server → (2) verify signature on server
+  - Client never trusted for payment confirmation — server re-verifies with HMAC
+  - MongoDB transactions used for enrollment atomicity (all-or-nothing)
+  - Multi-course purchase supported: array of courseIds in one Razorpay order
+
+6.6 DATABASE DESIGN DECISIONS
+  - Denormalized arrays: Course.studentsEnroled stores student IDs for quick enrollment count
+  - References preferred over embedding for large collections (courses, sections)
+  - SubSection.resources embedded as subdocument array (small, co-located with lecture)
+  - CourseProgress.videoProgress embedded array (accessed together with completedVideos)
+  - Compound index on CourseProgress (courseID + userId) for fast per-user-per-course lookup
+  - Text index on Course (name + description + tags) for full-text search
+  - TTL index on OTP (createdAt, 5 minutes) for automatic cleanup
+
+6.7 COURSE CONTENT ORGANIZATION
+  - 3-level hierarchy: Course → Section → SubSection (lecture)
+  - Cascading deletes: Course deletion removes all Sections and SubSections
+  - Duration tracked at SubSection level (seconds as string), aggregated at course level
+
+6.8 PROGRESS TRACKING DESIGN
+  - Separate CourseProgress document per user per course (not embedded in User or Course)
+  - completedVideos: array of SubSection IDs (set-like, no duplicates)
+  - videoProgress: array of {subsectionId, timestamp} for resume feature
+  - Progress percentage calculated on-the-fly in Profile controller, not stored
+
+6.9 MAINTENANCE MODE IMPLEMENTATION
+  - Single Maintenance document in DB (singleton pattern)
+  - Frontend polls every 5 minutes via setInterval in App.jsx
+  - Auto-logout non-admin users when maintenance activates
+  - Auto-expiry: if returnAt has passed, status treated as inactive
+
+6.10 EMAIL TEMPLATE ARCHITECTURE
+  - All emails use inline HTML (dark theme, yellow/red accents)
+  - Templates are JavaScript functions that return HTML strings
+  - Central mailSender.js utility handles all email sending
+  - Templates: emailVerification, login alert, passwordUpdate, courseEnrollment, paymentSuccess, contactFormRes, maintenanceNotification
+
+6.11 FRONTEND API LAYER
+  - Three layers: apiConnector (axios instance) → apis.js (endpoint constants) → operations/ (business logic)
+  - All API calls wrapped in try/catch with toast notifications for errors
+  - Token passed explicitly to operation functions (not auto-added to headers globally)
+  - Axios timeout: 30 seconds
+
+6.12 COURSE SEARCH IMPLEMENTATION
+  - MongoDB text search using $text: { $search: query }
+  - Additional filters applied after text match: category, priceType (free: price=0), minRating (via $gte)
+  - Sorting: text search score for relevance, price for price sorts
+  - Separate /searchCourses endpoint from /getAllCourses (which just paginates all published)
+
+6.13 FORM HANDLING
+  - React Hook Form used throughout for form validation and submission
+  - Avoids controlled component re-renders (performance benefit)
+  - File uploads use React Dropzone for drag-and-drop UX
+
+6.14 RATE LIMITING STRATEGY
+  - express-rate-limit on sensitive endpoints only (auth routes)
+  - Different limits based on risk: login higher (5) than OTP (3) since OTP sends email
+  - Configured with trustProxy for deployment behind reverse proxies
+
+6.15 ERROR HANDLING PATTERN
+  Backend:
+    - All controllers wrapped in try/catch
+    - Consistent response format: { success: true/false, message: "...", data: {} }
+    - HTTP status codes used appropriately (200, 400, 401, 403, 404, 500)
+
+  Frontend:
+    - All API calls catch errors and show react-hot-toast notifications
+    - Loading states tracked in Redux (loading flag in auth/profile slices)
+    - Navigation on success/failure handled within operation functions
+
+6.16 PAGINATION
+  - Both getAllCourses and getInstructorCourses support pagination
+  - Query params: page (default 1), limit (default 10 for courses, 6 for instructor)
+  - Response includes: { data, pagination: { totalCourses, totalPages, currentPage, limit } }
+  - Reviews also support pagination
+
+6.17 COMPONENT ARCHITECTURE
+  - Common components in /src/components/Common/ (Navbar, Footer, modals)
+  - Feature-specific components in /src/components/core/{feature}/
+  - Pages are thin containers; heavy logic in components and service operations
+  - Reusable: ConfirmationModal, RatingStars, ReviewSlider, IconBtn, Tab
+
+6.18 ROUTING STRUCTURE
+  - React Router v6 with nested routes for dashboard layout
+  - Dashboard uses Outlet pattern for nested page rendering
+  - Route-level code splitting not explicitly present (Vite handles chunking)
+
+================================================================================
+END OF ANALYSIS
+================================================================================

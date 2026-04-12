@@ -46,6 +46,16 @@ const {
   getAllRatingReview,
   deleteReview,
 } = require("../controllers/RatingandReview")
+
+// Q&A Controllers Import
+const {
+  askQuestion,
+  getQuestions,
+  answerQuestion,
+  toggleUpvote,
+  toggleDownvote,
+  toggleResolved,
+} = require("../controllers/Question")
 const {
   updateCourseProgress,
   updateVideoTimestamp,
@@ -110,5 +120,15 @@ router.post("/createRating", auth, isStudent, createRating)
 router.get("/getAverageRating", getAverageRating)
 router.get("/getReviews", getAllRatingReview)
 router.delete("/deleteReview", auth, isAdmin, deleteReview)
+
+// ********************************************************************************************************
+//                                      Q&A / Discussion Forum
+// ********************************************************************************************************
+router.post("/askQuestion",    auth, isStudent, askQuestion)
+router.get("/getQuestions",    auth, isStudent, getQuestions)
+router.post("/answerQuestion", auth, isStudent, answerQuestion)
+router.put("/upvoteQuestion",  auth, isStudent, toggleUpvote)
+router.put("/downvoteQuestion",auth, isStudent, toggleDownvote)
+router.put("/resolveQuestion", auth, isInstructor, toggleResolved)
 
 module.exports = router

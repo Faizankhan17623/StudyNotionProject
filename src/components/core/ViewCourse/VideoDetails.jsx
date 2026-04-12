@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
-import { FiDownload, FiFileText } from "react-icons/fi"
+import { FiDownload, FiFileText, FiMessageSquare, FiBookOpen } from "react-icons/fi"
+import QandA from "./QandA"
 
 import "video-react/dist/video-react.css"
 import { useLocation } from "react-router-dom"
@@ -27,6 +28,7 @@ const VideoDetails = () => {
   const [previewSource, setPreviewSource] = useState("")
   const [videoEnded, setVideoEnded] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState("overview")
 
   // FEATURE-9: Video Resume
   const timestampSaveTimer = useRef(null)
@@ -47,6 +49,7 @@ const VideoDetails = () => {
         setVideoData(filteredVideoData[0])
         setPreviewSource(courseEntireData.thumbnail)
         setVideoEnded(false)
+        setActiveTab("overview")
         lastSavedTimestamp.current = 0
       }
     })()
@@ -275,33 +278,72 @@ const VideoDetails = () => {
         </Player>
       )}
 
-      <h1 className="mt-4 text-3xl font-semibold">{videoData?.title}</h1>
-      <p className="pt-2 pb-4">{videoData?.description}</p>
+      {/* Lecture title */}
+      <h1 className="mt-4 text-2xl font-semibold text-richblack-5">{videoData?.title}</h1>
 
-      {/* FEATURE-15: Downloadable Resources */}
-      {videoData?.resources?.length > 0 && (
-        <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-5">
-          <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-richblack-5">
-            <FiFileText className="text-yellow-50" />
-            Lecture Resources
-          </h3>
-          <div className="flex flex-col gap-2">
-            {videoData.resources.map((resource, idx) => (
-              <a
-                key={idx}
-                href={resource.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between rounded-lg border border-richblack-600 bg-richblack-900 px-4 py-3 text-sm text-richblack-200 transition-colors hover:border-yellow-50 hover:text-yellow-50"
-              >
-                <span className="flex items-center gap-2">
-                  <FiFileText className="text-base" />
-                  {resource.title}
-                </span>
-                <FiDownload className="shrink-0 text-base" />
-              </a>
-            ))}
-          </div>
+      {/* Tab bar */}
+      <div className="mt-4 flex border-b border-richblack-700">
+        <button
+          onClick={() => setActiveTab("overview")}
+          className={`flex items-center gap-2 px-4 pb-3 text-sm font-semibold transition-colors ${
+            activeTab === "overview"
+              ? "border-b-2 border-yellow-50 text-yellow-50"
+              : "text-richblack-400 hover:text-richblack-200"
+          }`}
+        >
+          <FiBookOpen />
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab("qna")}
+          className={`flex items-center gap-2 px-4 pb-3 text-sm font-semibold transition-colors ${
+            activeTab === "qna"
+              ? "border-b-2 border-yellow-50 text-yellow-50"
+              : "text-richblack-400 hover:text-richblack-200"
+          }`}
+        >
+          <FiMessageSquare />
+          Q&amp;A
+        </button>
+      </div>
+
+      {/* Tab panels */}
+      {activeTab === "overview" && (
+        <div className="py-4">
+          <p className="text-sm leading-relaxed text-richblack-200">{videoData?.description}</p>
+
+          {/* FEATURE-15: Downloadable Resources */}
+          {videoData?.resources?.length > 0 && (
+            <div className="mt-5 rounded-xl border border-richblack-700 bg-richblack-800 p-5">
+              <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-richblack-5">
+                <FiFileText className="text-yellow-50" />
+                Lecture Resources
+              </h3>
+              <div className="flex flex-col gap-2">
+                {videoData.resources.map((resource, idx) => (
+                  <a
+                    key={idx}
+                    href={resource.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between rounded-lg border border-richblack-600 bg-richblack-900 px-4 py-3 text-sm text-richblack-200 transition-colors hover:border-yellow-50 hover:text-yellow-50"
+                  >
+                    <span className="flex items-center gap-2">
+                      <FiFileText className="text-base" />
+                      {resource.title}
+                    </span>
+                    <FiDownload className="shrink-0 text-base" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "qna" && (
+        <div className="py-4">
+          <QandA courseId={courseId} subSectionId={subSectionId} />
         </div>
       )}
     </div>
