@@ -15,7 +15,7 @@ exports.contactUsController = async (req, res) => {
   try {
     const emailRes = await mailSender(
       email,
-      "Your Data send successfully",
+      "We received your message – StudyNotion",
       contactUsEmail(email, firstname, lastname, message, phoneNo, countrycode)
     )
     // console.log("Email Res ", emailRes)
