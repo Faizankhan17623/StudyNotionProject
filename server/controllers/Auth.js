@@ -167,7 +167,7 @@ exports.login = async (req, res) => {
       // Set cookie for token and return success response
 
     
-      const emailContent = loginTemplate(email, ip, city,region,country ,timezone);
+      const emailContent = loginTemplate(email, ip, city, region, country, timezone, process.env.FRONTEND_URL);
       try {
         await mailSender(email, "New Login Detected", emailContent);
         // console.log("Login notification email sent successfully.")
@@ -282,7 +282,8 @@ exports.changePassword = async (req, res) => {
         "Password for your account has been updated",
         passwordUpdated(
           updatedUserDetails.email,
-          `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
+          `${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`,
+          process.env.FRONTEND_URL
         )
       )
       // console.log("Email sent successfully:", emailResponse.response)
