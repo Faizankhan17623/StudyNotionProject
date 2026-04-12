@@ -1,4 +1,9 @@
 // Importing necessary modules and packages
+const dotenv = require("dotenv");
+
+// Loading environment variables from .env file — must be first
+dotenv.config();
+
 const express = require("express");
 const app = express();
 const swaggerUi = require("swagger-ui-express");
@@ -14,14 +19,12 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const { cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
-const dotenv = require("dotenv");
+const os = require("os");
 const userAgent = require('express-useragent')
 var morgan = require('morgan')
+
 // Setting up port number
 const PORT = process.env.PORT || 4000;
-
-// Loading environment variables from .env file
-dotenv.config();
 
 // Trust Render/Vercel/Railway reverse proxy — required for express-rate-limit to work correctly
 app.set("trust proxy", 1);
@@ -49,7 +52,7 @@ app.use(morgan("dev"));
 app.use(
 	fileUpload({
 		useTempFiles: true,
-		tempFileDir: "/tmp/",
+		tempFileDir: os.tmpdir(),
 	})
 );
 
