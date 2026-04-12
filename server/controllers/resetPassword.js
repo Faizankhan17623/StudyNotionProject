@@ -1,7 +1,9 @@
 const User = require("../models/User")
 const mailSender = require("../utils/mailSender")
+const { passwordResetTemplate } = require("../mail/templates/passwordResetTemplate")
 const bcrypt = require("bcrypt")
 const crypto = require("crypto")
+
 exports.resetPasswordToken = async (req, res) => {
   try {
     const email = req.body.email
@@ -14,7 +16,7 @@ exports.resetPasswordToken = async (req, res) => {
     }
     const token = crypto.randomBytes(20).toString("hex")
 
-    const updatedDetails = await User.findOneAndUpdate(
+    await User.findOneAndUpdate(
       { email: email },
       {
         token: token,
@@ -22,21 +24,19 @@ exports.resetPasswordToken = async (req, res) => {
       },
       { new: true }
     )
-    // console.log("DETAILS", updatedDetails)
 
-    // const url = `http://localhost:3000/update-password/${token}`
-    const url = `${process.env.FRONTEND_URL}update-password/${token}`
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000/"
+    const url = `${frontendUrl}update-password/${token}`
 
     await mailSender(
       email,
-      "Password Reset",
-      `Your Link for email verification is ${url}. Please click this url to reset your password.`
+      "Reset Your StudyNotion Password",
+      passwordResetTemplate(`${user.firstName} ${user.lastName}`, url)
     )
 
     res.json({
       success: true,
-      message:
-        "Email Sent Successfully, Please Check Your Email to Continue Further",
+      message: "Email Sent Successfully, Please Check Your Email to Continue Further",
     })
   } catch (error) {
     return res.json({
