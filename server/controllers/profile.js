@@ -49,10 +49,9 @@ exports.updateProfile = async (req, res) => {
       updatedUserDetails,
     })
   } catch (error) {
-    // console.log(error)
     return res.status(500).json({
       success: false,
-      error: error.message,
+      message: error.message,
     })
   }
 }
@@ -130,9 +129,9 @@ exports.updateDisplayPicture = async (req, res) => {
       { image: image.secure_url },
       { new: true }
     )
-    res.send({
+    res.status(200).json({
       success: true,
-      message: `Image Updated successfully`,
+      message: "Image updated successfully",
       data: updatedProfile,
     })
   } catch (error) {
@@ -412,9 +411,9 @@ exports.instructorDashboard = async (req, res) => {
       return courseDataWithStats
     })
 
-    res.status(200).json({ courses: courseData })
+    res.status(200).json({ success: true, courses: courseData })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: "Server Error" })
+    res.status(500).json({ success: false, message: "Internal server error" })
   }
 }
