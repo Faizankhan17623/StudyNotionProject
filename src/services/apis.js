@@ -25,6 +25,7 @@ export const studentEndpoints = {
   COURSE_PAYMENT_API: BASE_URL + "/payment/capturePayment",
   COURSE_VERIFY_API: BASE_URL + "/payment/verifyPayment",
   SEND_PAYMENT_SUCCESS_EMAIL_API: BASE_URL + "/payment/sendPaymentSuccessEmail",
+  ENROLL_FREE_API: BASE_URL + "/payment/enrollFree",
 }
 
 // COURSE ENDPOINTS
@@ -50,6 +51,7 @@ export const courseEndpoints = {
   CREATE_RATING_API: BASE_URL + "/course/createRating",
   CREATE_CATEGORY_API: BASE_URL + "/course/createCategory",
   SEARCH_COURSES_API: BASE_URL + "/course/searchCourses",
+  GET_FILTER_OPTIONS_API: BASE_URL + "/course/getFilterOptions",
   DELETE_REVIEW_API: BASE_URL + "/course/deleteReview",
 }
 
@@ -80,11 +82,34 @@ export const settingsEndpoints = {
   DELETE_PROFILE_API: BASE_URL + "/profile/deleteProfile",
 }
 
+// ADMIN ANALYTICS
+export const adminEndpoints = {
+  ADMIN_ANALYTICS_API: BASE_URL + "/course/adminAnalytics",
+}
+
 // MAINTENANCE ENDPOINTS
 export const maintenanceEndpoints = {
   GET_MAINTENANCE_STATUS_API: BASE_URL + "/maintenance/status",
   SET_MAINTENANCE_API: BASE_URL + "/maintenance/set",
   SEND_MAINTENANCE_NOTIFICATION_API: BASE_URL + "/maintenance/notify",
+}
+
+// COUPON ENDPOINTS
+export const couponEndpoints = {
+  CREATE_COUPON_API:       BASE_URL + "/course/createCoupon",
+  GET_COURSE_COUPONS_API:  BASE_URL + "/course/getCourseCoupons",
+  DELETE_COUPON_API:       BASE_URL + "/course/deleteCoupon",
+  TOGGLE_COUPON_API:       BASE_URL + "/course/toggleCoupon",
+  APPLY_COUPON_API:        BASE_URL + "/course/applyCoupon",
+}
+
+// NOTES ENDPOINTS
+export const noteEndpoints = {
+  ADD_NOTE_API:              BASE_URL + "/course/addNote",
+  GET_NOTES_API:             BASE_URL + "/course/getNotes",
+  GET_ALL_COURSE_NOTES_API:  BASE_URL + "/course/getAllCourseNotes",
+  DELETE_NOTE_API:           BASE_URL + "/course/deleteNote",
+  EDIT_NOTE_API:             BASE_URL + "/course/editNote",
 }
 
 // Q&A ENDPOINTS
