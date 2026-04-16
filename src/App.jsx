@@ -19,6 +19,7 @@ import MyProfile from "./components/core/Dashboard/MyProfile"
 import CreateCategory from "./components/core/Dashboard/Admin/CreateCategory"
 import ReviewModeration from "./components/core/Dashboard/Admin/ReviewModeration"
 import MaintenanceMode from "./components/core/Dashboard/Admin/MaintenanceMode"
+import AdminAnalytics from "./components/core/Dashboard/Admin/AdminAnalytics"
 import MaintenanceBanner from "./components/Common/MaintenanceBanner"
 import AnnouncementTicker from "./components/Common/AnnouncementTicker"
 import Settings from "./components/core/Dashboard/Settings"
@@ -109,7 +110,7 @@ function App() {
   return (
     <div className="flex min-h-screen w-screen flex-col bg-richblack-900 font-inter">
       {/* Announcement ticker — visible on every route */}
-      <AnnouncementTicker />
+      {/* <AnnouncementTicker /> */}
       {/* Admin-only maintenance banner — reminds admin that maintenance is still active */}
       {maintenanceData?.isActive && user?.accountType === ACCOUNT_TYPE.ADMIN && (
         <MaintenanceBanner data={maintenanceData} />
@@ -207,6 +208,14 @@ function App() {
             element={
               <AdminRoute>
                 <MaintenanceMode />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="dashboard/admin-analytics"
+            element={
+              <AdminRoute>
+                <AdminAnalytics />
               </AdminRoute>
             }
           />
