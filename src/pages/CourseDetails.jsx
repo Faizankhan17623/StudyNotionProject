@@ -13,7 +13,7 @@ import CourseAccordionBar from "../components/core/Course/CourseAccordionBar"
 import CourseDetailsCard from "../components/core/Course/CourseDetailsCard"
 import { formatDate } from "../services/formatDate"
 import { fetchCourseDetails } from "../services/operations/courseAPI"
-import { BuyCourse } from "../services/operations/paymentsAPI"
+import { BuyCourse, EnrollFreeCourse } from "../services/operations/paymentsAPI"
 import GetAvgRating from "../utils/avgRating"
 import Error from "./Error"
 
@@ -105,12 +105,16 @@ function CourseDetails() {
 
   const handleBuyCourse = () => {
     if (token) {
-      BuyCourse(token, [courseId], user, navigate, dispatch)
+      if (price === 0) {
+        EnrollFreeCourse(token, [courseId], navigate, dispatch)
+      } else {
+        BuyCourse(token, [courseId], user, navigate, dispatch)
+      }
       return
     }
     setConfirmationModal({
       text1: "You are not logged in!",
-      text2: "Please login to Purchase Course.",
+      text2: price === 0 ? "Please login to enroll in this free course." : "Please login to Purchase Course.",
       btn1Text: "Login",
       btn2Text: "Cancel",
       btn1Handler: () => navigate("/login"),
