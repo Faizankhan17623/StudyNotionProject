@@ -14,6 +14,7 @@ const {
   getInstructorCourses,
   deleteCourse,
   searchCourses,
+  getFilterOptions,
 } = require("../controllers/Course")
 
 // Tags Controllers Import
@@ -56,6 +57,26 @@ const {
   toggleDownvote,
   toggleResolved,
 } = require("../controllers/Question")
+
+// Coupon Controllers Import
+const {
+  createCoupon,
+  getCourseCoupons,
+  deleteCoupon,
+  toggleCoupon,
+  applyCoupon,
+} = require("../controllers/Coupon")
+
+// Notes Controllers Import
+const {
+  addNote,
+  getNotes,
+  getAllCourseNotes,
+  deleteNote,
+  editNote,
+} = require("../controllers/Note")
+// Admin Analytics Import
+const { getAdminAnalytics } = require("../controllers/adminAnalytics")
 const {
   updateCourseProgress,
   updateVideoTimestamp,
@@ -90,6 +111,8 @@ router.get("/getInstructorCourses", auth, isInstructor, getInstructorCourses)
 router.get("/getAllCourses", getAllCourses)
 // Search and filter courses
 router.get("/searchCourses", searchCourses)
+// Get distinct filter options (categories, languages, levels)
+router.get("/getFilterOptions", getFilterOptions)
 // Get Details for a Specific Courses
 router.post("/getCourseDetails", getCourseDetails)
 // Get Details for a Specific Courses
@@ -107,6 +130,9 @@ router.delete("/deleteCourse", auth, isInstructor, deleteCourse)
 // ********************************************************************************************************
 //                                      Category routes (Only by Admin)
 // ********************************************************************************************************
+// Admin Analytics
+router.get("/adminAnalytics", auth, isAdmin, getAdminAnalytics)
+
 // Category can Only be Created by Admin
 // TODO: Put IsAdmin Middleware here
 router.post("/createCategory", auth, isAdmin, createCategory)
@@ -124,6 +150,24 @@ router.delete("/deleteReview", auth, isAdmin, deleteReview)
 // ********************************************************************************************************
 //                                      Q&A / Discussion Forum
 // ********************************************************************************************************
+// ********************************************************************************************************
+//                                      Coupon routes
+// ********************************************************************************************************
+router.post("/createCoupon",      auth, isInstructor, createCoupon)
+router.get("/getCourseCoupons",   auth, isInstructor, getCourseCoupons)
+router.delete("/deleteCoupon",    auth, isInstructor, deleteCoupon)
+router.put("/toggleCoupon",       auth, isInstructor, toggleCoupon)
+router.post("/applyCoupon",       auth, isStudent, applyCoupon)
+
+// ********************************************************************************************************
+//                                      Notes
+// ********************************************************************************************************
+router.post("/addNote",            auth, isStudent, addNote)
+router.get("/getNotes",            auth, isStudent, getNotes)
+router.get("/getAllCourseNotes",   auth, isStudent, getAllCourseNotes)
+router.delete("/deleteNote",       auth, isStudent, deleteNote)
+router.put("/editNote",            auth, isStudent, editNote)
+
 router.post("/askQuestion",    auth, isStudent, askQuestion)
 router.get("/getQuestions",    auth, isStudent, getQuestions)
 router.post("/answerQuestion", auth, isStudent, answerQuestion)
