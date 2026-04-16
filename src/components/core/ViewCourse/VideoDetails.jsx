@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
-import { FiDownload, FiFileText, FiMessageSquare, FiBookOpen } from "react-icons/fi"
+import { FiDownload, FiFileText, FiMessageSquare, FiBookOpen, FiEdit3 } from "react-icons/fi"
 import QandA from "./QandA"
+import Notes from "./Notes"
 
 import "video-react/dist/video-react.css"
 import { useLocation } from "react-router-dom"
@@ -29,6 +30,7 @@ const VideoDetails = () => {
   const [videoEnded, setVideoEnded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
+  const [capturedTimestamp, setCapturedTimestamp] = useState(0)
 
   // FEATURE-9: Video Resume
   const timestampSaveTimer = useRef(null)
@@ -50,6 +52,7 @@ const VideoDetails = () => {
         setPreviewSource(courseEntireData.thumbnail)
         setVideoEnded(false)
         setActiveTab("overview")
+        setCapturedTimestamp(0)
         lastSavedTimestamp.current = 0
       }
     })()
@@ -113,6 +116,26 @@ const VideoDetails = () => {
       if (typeof unsubscribe === "function") unsubscribe()
     }
   }, [subSectionId, saveTimestamp])
+
+  // Handle tab switch — auto-pause video and capture timestamp when Notes tab opens
+  const handleTabChange = (tab) => {
+    if (tab === "notes" && activeTab !== "notes") {
+      // Capture current video position then pause
+      const state = playerRef.current?.getState?.()?.player
+      const currentTime = state?.currentTime ?? 0
+      setCapturedTimestamp(currentTime)
+      if (!state?.paused) {
+        playerRef.current?.pause?.()
+      }
+    }
+    setActiveTab(tab)
+  }
+
+  // Seek video to a saved timestamp and switch to overview so player is visible
+  const handleSeekTo = (seconds) => {
+    playerRef.current?.seek?.(seconds)
+    setActiveTab("overview")
+  }
 
   const isFirstVideo = () => {
     const currentSectionIndx = courseSectionData.findIndex(
@@ -284,7 +307,7 @@ const VideoDetails = () => {
       {/* Tab bar */}
       <div className="mt-4 flex border-b border-richblack-700">
         <button
-          onClick={() => setActiveTab("overview")}
+          onClick={() => handleTabChange("overview")}
           className={`flex items-center gap-2 px-4 pb-3 text-sm font-semibold transition-colors ${
             activeTab === "overview"
               ? "border-b-2 border-yellow-50 text-yellow-50"
@@ -295,7 +318,18 @@ const VideoDetails = () => {
           Overview
         </button>
         <button
-          onClick={() => setActiveTab("qna")}
+          onClick={() => handleTabChange("notes")}
+          className={`flex items-center gap-2 px-4 pb-3 text-sm font-semibold transition-colors ${
+            activeTab === "notes"
+              ? "border-b-2 border-yellow-50 text-yellow-50"
+              : "text-richblack-400 hover:text-richblack-200"
+          }`}
+        >
+          <FiEdit3 />
+          Notes
+        </button>
+        <button
+          onClick={() => handleTabChange("qna")}
           className={`flex items-center gap-2 px-4 pb-3 text-sm font-semibold transition-colors ${
             activeTab === "qna"
               ? "border-b-2 border-yellow-50 text-yellow-50"
@@ -338,6 +372,18 @@ const VideoDetails = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === "notes" && (
+        <div className="py-4">
+          <Notes
+            courseId={courseId}
+            sectionId={sectionId}
+            subSectionId={subSectionId}
+            capturedTimestamp={capturedTimestamp}
+            onSeekTo={handleSeekTo}
+          />
         </div>
       )}
 
