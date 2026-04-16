@@ -430,7 +430,18 @@ exports.getFullCourseDetails = async (req, res) => {
 // Search and filter Published courses
 exports.searchCourses = async (req, res) => {
   try {
-    const { q = "", category, priceType, minRating, sortBy = "relevance" } = req.query
+    const {
+      q = "",
+      category,
+      priceType,
+      minRating,
+      level,
+      language,
+      duration,
+      sortBy = "relevance",
+      page = 1,
+      limit = 12,
+    } = req.query
 
     let filter = { status: "Published" }
 
@@ -444,44 +455,153 @@ exports.searchCourses = async (req, res) => {
     }
 
     // Category filter
-    if (category) {
-      filter.category = category
-    }
+    if (category) filter.category = category
 
     // Price filter
     if (priceType === "free") filter.price = 0
-    if (priceType === "paid") filter.price = { $gt: 0 }
+    else if (priceType === "paid") filter.price = { $gt: 0 }
+
+    // Rating filter — DB-level using the stored averageRating field (fast, no in-memory scan)
+    if (minRating) filter.averageRating = { $gte: Number(minRating) }
+
+    // Level filter — supports comma-separated multi-select e.g. "Beginner,Advanced"
+    if (level) {
+      const levels = level.split(",").map((l) => l.trim()).filter(Boolean)
+      if (levels.length) filter.level = { $in: levels }
+    }
+
+    // Language filter — supports comma-separated multi-select
+    if (language) {
+      const languages = language.split(",").map((l) => l.trim()).filter(Boolean)
+      if (languages.length) filter.language = { $in: languages }
+    }
+
+    // Duration filter — totalDuration is stored in seconds
+    if (duration) {
+      const durationMap = {
+        "0-2":  { $lte: 2 * 3600 },
+        "2-5":  { $gt: 2 * 3600,  $lte: 5 * 3600 },
+        "5-10": { $gt: 5 * 3600,  $lte: 10 * 3600 },
+        "10+":  { $gt: 10 * 3600 },
+      }
+      if (durationMap[duration]) filter.totalDuration = durationMap[duration]
+    }
 
     // Sort option
     let sortOption = { createdAt: -1 }
-    if (sortBy === "price-asc") sortOption = { price: 1 }
+    if (sortBy === "price-asc")  sortOption = { price: 1 }
     else if (sortBy === "price-desc") sortOption = { price: -1 }
+    else if (sortBy === "top-rated")  sortOption = { averageRating: -1 }
+    else if (sortBy === "newest")     sortOption = { createdAt: -1 }
 
-    let courses = await Course.find(filter)
-      .populate("instructor", "firstName lastName image")
-      .populate("ratingAndReviews")
-      .populate("category", "name")
-      .select(
-        "courseName courseDescription thumbnail instructor ratingAndReviews price studentsEnroled category createdAt tag"
-      )
-      .sort(sortOption)
-      .exec()
+    const pageNum  = Math.max(1, parseInt(page))
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)))
+    const skip     = (pageNum - 1) * limitNum
 
-    // Minimum rating filter (done after populate since rating is in sub-documents)
-    if (minRating) {
-      courses = courses.filter((course) => {
-        if (!course.ratingAndReviews.length) return false
-        const avg =
-          course.ratingAndReviews.reduce((sum, r) => sum + r.rating, 0) /
-          course.ratingAndReviews.length
-        return avg >= Number(minRating)
+    // For "popular" sort we need to sort by enrollment count — use aggregation
+    if (sortBy === "popular") {
+      const pipeline = [
+        { $match: filter },
+        { $addFields: { enrollmentCount: { $size: "$studentsEnroled" } } },
+        { $sort: { enrollmentCount: -1 } },
+        {
+          $facet: {
+            metadata: [{ $count: "totalCount" }],
+            data: [
+              { $skip: skip },
+              { $limit: limitNum },
+              {
+                $lookup: {
+                  from: "users",
+                  localField: "instructor",
+                  foreignField: "_id",
+                  as: "instructor",
+                  pipeline: [{ $project: { firstName: 1, lastName: 1, image: 1 } }],
+                },
+              },
+              { $unwind: { path: "$instructor", preserveNullAndEmptyArrays: true } },
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "category",
+                  foreignField: "_id",
+                  as: "category",
+                  pipeline: [{ $project: { name: 1 } }],
+                },
+              },
+              { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+              {
+                $project: {
+                  courseName: 1, courseDescription: 1, thumbnail: 1, instructor: 1,
+                  averageRating: 1, price: 1, studentsEnroled: 1, category: 1,
+                  createdAt: 1, tag: 1, level: 1, language: 1, totalDuration: 1, totalLectures: 1,
+                },
+              },
+            ],
+          },
+        },
+      ]
+
+      const [result] = await Course.aggregate(pipeline)
+      const totalCount = result.metadata[0]?.totalCount || 0
+
+      return res.status(200).json({
+        success: true,
+        data: result.data,
+        pagination: {
+          totalCount,
+          totalPages: Math.ceil(totalCount / limitNum),
+          currentPage: pageNum,
+          limit: limitNum,
+        },
       })
     }
+
+    // Standard find-based query for all other sort options
+    const totalCount = await Course.countDocuments(filter)
+
+    const courses = await Course.find(filter)
+      .populate("instructor", "firstName lastName image")
+      .populate("category", "name")
+      .select(
+        "courseName courseDescription thumbnail instructor averageRating price studentsEnroled category createdAt tag level language totalDuration totalLectures"
+      )
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNum)
+      .exec()
 
     return res.status(200).json({
       success: true,
       data: courses,
-      count: courses.length,
+      pagination: {
+        totalCount,
+        totalPages: Math.ceil(totalCount / limitNum),
+        currentPage: pageNum,
+        limit: limitNum,
+      },
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+// Get distinct filter options (categories, languages, levels) for the search sidebar
+exports.getFilterOptions = async (req, res) => {
+  try {
+    const [languages, levels, categoriesList] = await Promise.all([
+      Course.distinct("language", { status: "Published" }),
+      Course.distinct("level", { status: "Published" }),
+      Category.find({}, "name _id"),
+    ])
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        languages: languages.filter(Boolean).sort(),
+        levels: levels.filter(Boolean),
+        categories: categoriesList,
+      },
     })
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message })

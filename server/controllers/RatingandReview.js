@@ -51,6 +51,15 @@ exports.createRating = async (req, res) => {
     })
     await courseDetails.save()
 
+    // Recalculate and store averageRating on the course document
+    const courseWithReviews = await Course.findById(courseId).populate("ratingAndReviews", "rating")
+    const newAvg =
+      courseWithReviews.ratingAndReviews.length > 0
+        ? courseWithReviews.ratingAndReviews.reduce((sum, r) => sum + r.rating, 0) /
+          courseWithReviews.ratingAndReviews.length
+        : 0
+    await Course.findByIdAndUpdate(courseId, { averageRating: parseFloat(newAvg.toFixed(2)) })
+
     return res.status(201).json({
       success: true,
       message: "Rating and review created successfully",
@@ -121,6 +130,16 @@ exports.deleteReview = async (req, res) => {
       $pull: { ratingAndReviews: reviewId },
     })
     await RatingAndReview.findByIdAndDelete(reviewId)
+
+    // Recalculate averageRating after deletion
+    const courseAfterDelete = await Course.findById(review.course).populate("ratingAndReviews", "rating")
+    const updatedAvg =
+      courseAfterDelete.ratingAndReviews.length > 0
+        ? courseAfterDelete.ratingAndReviews.reduce((sum, r) => sum + r.rating, 0) /
+          courseAfterDelete.ratingAndReviews.length
+        : 0
+    await Course.findByIdAndUpdate(review.course, { averageRating: parseFloat(updatedAvg.toFixed(2)) })
+
     return res.status(200).json({ success: true, message: "Review deleted successfully" })
   } catch (error) {
     console.error(error)

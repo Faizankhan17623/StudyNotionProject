@@ -32,9 +32,9 @@ exports.signup = async (req, res) => {
       !confirmPassword ||
       !otp
     ) {
-      return res.status(403).send({
+      return res.status(400).json({
         success: false,
-        message: "All Fields are required",
+        message: "All fields are required",
       })
     }
     // Check if password and confirm password match
@@ -242,7 +242,7 @@ exports.sendotp = async (req, res) => {
     })
   } catch (error) {
     // console.log(error.message)
-    return res.status(500).json({ success: false, error: error.message })
+    return res.status(500).json({ success: false, message: error.message })
   }
 }
 

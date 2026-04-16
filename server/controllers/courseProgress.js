@@ -3,6 +3,7 @@ const Section = require("../models/Section")
 const SubSection = require("../models/Subsection")
 const CourseProgress = require("../models/CourseProgress")
 const Course = require("../models/Course")
+const User = require("../models/User")
 
 exports.updateCourseProgress = async (req, res) => {
   const { courseId, subsectionId } = req.body
@@ -40,7 +41,46 @@ exports.updateCourseProgress = async (req, res) => {
     // Save the updated course progress
     await courseProgress.save()
 
-    return res.status(200).json({ message: "Course progress updated" })
+    // ── Update learning streak ──────────────────────────────────────────────
+    try {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const user = await User.findById(userId)
+
+      if (user) {
+        if (user.lastStudyDate) {
+          const last = new Date(user.lastStudyDate)
+          last.setHours(0, 0, 0, 0)
+          const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24))
+
+          if (diffDays === 0) {
+            // Already counted today — no change
+          } else if (diffDays === 1) {
+            // Consecutive day — extend streak
+            user.currentStreak += 1
+            user.longestStreak = Math.max(user.longestStreak, user.currentStreak)
+            user.lastStudyDate = today
+          } else {
+            // Gap — reset streak
+            user.currentStreak = 1
+            user.lastStudyDate = today
+          }
+        } else {
+          // Very first study session
+          user.currentStreak = 1
+          user.longestStreak = 1
+          user.lastStudyDate = today
+        }
+        await user.save()
+      }
+    } catch (streakErr) {
+      // Streak update is non-critical — don't fail the main request
+      console.error("Streak update error:", streakErr.message)
+    }
+    // ───────────────────────────────────────────────────────────────────────
+
+    return res.status(200).json({ success: true, message: "Course progress updated" })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: "Internal server error" })
