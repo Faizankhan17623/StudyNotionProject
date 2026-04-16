@@ -75,7 +75,13 @@ function Course_Card({ course, Height }) {
                 {course?.ratingAndReviews?.length} Ratings
               </span>
             </div>
-            <p className="text-xl text-richblack-5">Rs. {course?.price}</p>
+            <p className="text-xl text-richblack-5">
+              {course?.price === 0 ? (
+                <span className="text-caribbeangreen-100 font-semibold">Free</span>
+              ) : (
+                `Rs. ${course?.price}`
+              )}
+            </p>
           </div>
         </div>
       </Link>
