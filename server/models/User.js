@@ -74,7 +74,10 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
-    // Add timestamps for when the document is created and last modified
+    // ── Learning Streak ──────────────────────────────────────────────────────
+    currentStreak:  { type: Number, default: 0 },
+    longestStreak:  { type: Number, default: 0 },
+    lastStudyDate:  { type: Date,   default: null },
   },
   { timestamps: true }
 )
