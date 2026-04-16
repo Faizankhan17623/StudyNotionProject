@@ -108,7 +108,11 @@ function Wishlist() {
                 {/* Price + Remove */}
                 <div className="flex flex-row items-center gap-4 sm:flex-col sm:items-end">
                   <p className="text-2xl font-bold text-richblack-5">
-                    ₹{course.price}
+                    {course.price === 0 ? (
+                      <span className="text-caribbeangreen-100">Free</span>
+                    ) : (
+                      `₹${course.price}`
+                    )}
                   </p>
                   <button
                     onClick={() => handleRemove(course._id)}
