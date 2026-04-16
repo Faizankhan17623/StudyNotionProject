@@ -5,7 +5,7 @@ import { setCourse, setEditCourse } from "../../../../slices/courseSlice"
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css"
 import { useState } from "react"
 import { FaCheck } from "react-icons/fa"
-import { FiEdit2 } from "react-icons/fi"
+import { FiEdit2, FiTag } from "react-icons/fi"
 import { HiClock } from "react-icons/hi"
 import { RiDeleteBin6Line } from "react-icons/ri"
 import { useNavigate } from "react-router-dom"
@@ -17,6 +17,7 @@ import {
 } from "../../../../services/operations/courseAPI"
 import { COURSE_STATUS } from "../../../../utils/constants"
 import ConfirmationModal from "../../../Common/ConfirmationModal"
+import CouponModal from "./CouponModal"
 
 export default function CoursesTable({ courses, setCourses, currentPage, setCurrentPage }) {
   const dispatch = useDispatch()
@@ -24,6 +25,8 @@ export default function CoursesTable({ courses, setCourses, currentPage, setCurr
   const { token } = useSelector((state) => state.auth)
   const [loading, setLoading] = useState(false)
   const [confirmationModal, setConfirmationModal] = useState(null)
+  const [couponModal, setCouponModal] = useState(null)
+  // couponModal shape: { courseId, courseName }
   const TRUNCATE_LENGTH = 30
 
   const handleCourseDelete = async (courseId) => {
@@ -132,6 +135,14 @@ export default function CoursesTable({ courses, setCourses, currentPage, setCurr
                   </button>
                   <button
                     disabled={loading}
+                    onClick={() => setCouponModal({ courseId: course._id, courseName: course.courseName })}
+                    title="Manage Coupons"
+                    className="px-2 transition-all duration-200 hover:scale-110 hover:text-yellow-50"
+                  >
+                    <FiTag size={20} />
+                  </button>
+                  <button
+                    disabled={loading}
                     onClick={() => {
                       setConfirmationModal({
                         text1: "Do you want to delete this course?",
@@ -159,6 +170,13 @@ export default function CoursesTable({ courses, setCourses, currentPage, setCurr
         </Tbody>
       </Table>
       {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
+      {couponModal && (
+        <CouponModal
+          courseId={couponModal.courseId}
+          courseName={couponModal.courseName}
+          onClose={() => setCouponModal(null)}
+        />
+      )}
     </>
   )
 }
