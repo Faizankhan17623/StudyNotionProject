@@ -2,7 +2,7 @@ import { toast } from "react-hot-toast"
 
 import { updateCompletedLectures } from "../../slices/viewCourseSlice"
 import { apiConnector } from "../apiConnector"
-import { catalogData, courseEndpoints, questionEndpoints } from "../apis"
+import { catalogData, courseEndpoints, questionEndpoints, noteEndpoints, couponEndpoints } from "../apis"
 
 const {
   GET_ALL_COURSE_API,
@@ -23,6 +23,7 @@ const {
   LECTURE_COMPLETION_API,
   CREATE_CATEGORY_API,
   SEARCH_COURSES_API,
+  GET_FILTER_OPTIONS_API,
 } = courseEndpoints
 
 const { CATALOGPAGEDATA_API } = catalogData
@@ -68,7 +69,7 @@ export const fetchCourseDetails = async (courseId) => {
     result = response.data
   } catch (error) {
     console.log("COURSE_DETAILS_API API ERROR............", error)
-    result = error.response.data
+    toast.error(error.message || "Could not load course details.")
   }
   toast.dismiss(toastId)
   return result
@@ -180,7 +181,7 @@ export const getFullDetailsOfCourse = async (courseId, token) => {
     result = response?.data?.data
   } catch (error) {
     console.log("COURSE_FULL_DETAILS_API API ERROR............", error)
-    result = error.response.data
+    toast.error(error.message || "Could not load course details.")
   }
   toast.dismiss(toastId)
   return result
@@ -386,18 +387,34 @@ export const getCatalogPageData = async (categoryId) => {
 // ********************************************************************************************************
 
 export const searchCourses = async (params) => {
-  let result = []
+  let result = { data: [], pagination: null }
   try {
     const response = await apiConnector("GET", SEARCH_COURSES_API, null, null, params)
     if (!response?.data?.success) {
       throw new Error("Could Not Fetch Search Results")
     }
-    result = response?.data?.data
+    result = {
+      data: response?.data?.data,
+      pagination: response?.data?.pagination,
+    }
   } catch (error) {
     console.log("SEARCH_COURSES_API ERROR............", error)
-    toast.error("Could not fetch search results")
+    toast.error(error.message || "Could not fetch search results.")
   }
   return result
+}
+
+export const getFilterOptions = async () => {
+  try {
+    const response = await apiConnector("GET", GET_FILTER_OPTIONS_API)
+    if (!response?.data?.success) {
+      throw new Error("Could Not Fetch Filter Options")
+    }
+    return response?.data?.data
+  } catch (error) {
+    console.log("GET_FILTER_OPTIONS_API ERROR............", error)
+    return { languages: [], levels: [], categories: [] }
+  }
 }
 
 // ********************************************************************************************************
@@ -518,6 +535,165 @@ export const toggleResolveQuestion = async (questionId, token) => {
     return response.data
   } catch (error) {
     console.log("RESOLVE_QUESTION_API ERROR:", error)
+    return null
+  }
+}
+
+// ********************************************************************************************************
+//                                      Coupon Operations
+// ********************************************************************************************************
+
+export const createCoupon = async (data, token) => {
+  try {
+    const response = await apiConnector("POST", couponEndpoints.CREATE_COUPON_API, data, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) throw new Error(response?.data?.message)
+    toast.success("Coupon created successfully")
+    return response.data.data
+  } catch (error) {
+    console.log("CREATE_COUPON_API ERROR:", error)
+    toast.error(error.message || "Could not create coupon")
+    return null
+  }
+}
+
+export const getCourseCoupons = async (courseId, token) => {
+  try {
+    const response = await apiConnector(
+      "GET",
+      `${couponEndpoints.GET_COURSE_COUPONS_API}?courseId=${courseId}`,
+      null,
+      { Authorization: `Bearer ${token}` }
+    )
+    if (!response?.data?.success) throw new Error("Could not fetch coupons")
+    return response.data.data
+  } catch (error) {
+    console.log("GET_COURSE_COUPONS_API ERROR:", error)
+    return []
+  }
+}
+
+export const deleteCouponAPI = async (couponId, token) => {
+  try {
+    const response = await apiConnector("DELETE", couponEndpoints.DELETE_COUPON_API, { couponId }, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) throw new Error(response?.data?.message)
+    toast.success("Coupon deleted")
+    return true
+  } catch (error) {
+    console.log("DELETE_COUPON_API ERROR:", error)
+    toast.error(error.message || "Could not delete coupon")
+    return false
+  }
+}
+
+export const toggleCouponAPI = async (couponId, token) => {
+  try {
+    const response = await apiConnector("PUT", couponEndpoints.TOGGLE_COUPON_API, { couponId }, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) throw new Error("Could not update coupon")
+    return response.data
+  } catch (error) {
+    console.log("TOGGLE_COUPON_API ERROR:", error)
+    toast.error("Could not update coupon")
+    return null
+  }
+}
+
+export const applyCouponAPI = async (code, courses, token) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      couponEndpoints.APPLY_COUPON_API,
+      { code, courses },
+      { Authorization: `Bearer ${token}` }
+    )
+    if (!response?.data?.success) throw new Error(response?.data?.message)
+    return response.data.data
+  } catch (error) {
+    console.log("APPLY_COUPON_API ERROR:", error)
+    toast.error(error.message || "Invalid or expired coupon code")
+    return null
+  }
+}
+
+// ********************************************************************************************************
+//                                      Notes Operations
+// ********************************************************************************************************
+
+export const addNote = async (data, token) => {
+  try {
+    const response = await apiConnector("POST", noteEndpoints.ADD_NOTE_API, data, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) throw new Error("Could not save note")
+    return response.data.data
+  } catch (error) {
+    console.log("ADD_NOTE_API ERROR:", error)
+    toast.error("Could not save note")
+    return null
+  }
+}
+
+export const getNotes = async (courseId, subsectionId, token) => {
+  try {
+    const response = await apiConnector(
+      "GET",
+      `${noteEndpoints.GET_NOTES_API}?courseId=${courseId}&subsectionId=${subsectionId}`,
+      null,
+      { Authorization: `Bearer ${token}` }
+    )
+    if (!response?.data?.success) throw new Error("Could not fetch notes")
+    return response.data.data
+  } catch (error) {
+    console.log("GET_NOTES_API ERROR:", error)
+    return []
+  }
+}
+
+export const getAllCourseNotes = async (courseId, token) => {
+  try {
+    const response = await apiConnector(
+      "GET",
+      `${noteEndpoints.GET_ALL_COURSE_NOTES_API}?courseId=${courseId}`,
+      null,
+      { Authorization: `Bearer ${token}` }
+    )
+    if (!response?.data?.success) throw new Error("Could not fetch notes")
+    return response.data.data
+  } catch (error) {
+    console.log("GET_ALL_COURSE_NOTES_API ERROR:", error)
+    return []
+  }
+}
+
+export const deleteNote = async (noteId, token) => {
+  try {
+    const response = await apiConnector("DELETE", noteEndpoints.DELETE_NOTE_API, { noteId }, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) throw new Error("Could not delete note")
+    return true
+  } catch (error) {
+    console.log("DELETE_NOTE_API ERROR:", error)
+    toast.error("Could not delete note")
+    return false
+  }
+}
+
+export const editNote = async (noteId, body, token) => {
+  try {
+    const response = await apiConnector("PUT", noteEndpoints.EDIT_NOTE_API, { noteId, body }, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) throw new Error("Could not edit note")
+    return response.data.data
+  } catch (error) {
+    console.log("EDIT_NOTE_API ERROR:", error)
+    toast.error("Could not edit note")
     return null
   }
 }
