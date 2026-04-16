@@ -54,6 +54,7 @@ export default function CourseInformationForm() {
       setValue("courseCategory", course.category)
       setValue("courseRequirements", course.instructions)
       setValue("courseImage", course.thumbnail)
+      setValue("courseLevel", course.level || "Beginner")
     }
     getCategories()
 
@@ -72,7 +73,8 @@ export default function CourseInformationForm() {
       currentValues.courseCategory._id !== course.category._id ||
       currentValues.courseRequirements.toString() !==
         course.instructions.toString() ||
-      currentValues.courseImage !== course.thumbnail
+      currentValues.courseImage !== course.thumbnail ||
+      currentValues.courseLevel !== (course.level || "Beginner")
     ) {
       return true
     }
@@ -123,6 +125,9 @@ export default function CourseInformationForm() {
         if (currentValues.courseImage !== course.thumbnail) {
           formData.append("thumbnailImage", data.courseImage)
         }
+        if (currentValues.courseLevel !== (course.level || "Beginner")) {
+          formData.append("level", data.courseLevel)
+        }
         // console.log("Edit Form data: ", formData)
         setLoading(true)
         const result = await editCourseDetails(formData, token)
@@ -147,6 +152,7 @@ export default function CourseInformationForm() {
     formData.append("status", COURSE_STATUS.DRAFT)
     formData.append("instructions", JSON.stringify(data.courseRequirements))
     formData.append("thumbnailImage", data.courseImage)
+    formData.append("level", data.courseLevel || "Beginner")
     setLoading(true)
     const result = await addCourseDetails(formData, token)
     if (result) {
@@ -199,17 +205,16 @@ export default function CourseInformationForm() {
       <div className="flex flex-col space-y-2">
         <label className="text-sm text-richblack-5" htmlFor="coursePrice">
           Course Price <sup className="text-pink-200">*</sup>
+          <span className="ml-2 text-xs font-normal text-richblack-400">(Enter 0 to make it free)</span>
         </label>
         <div className="relative">
           <input
             id="coursePrice"
-            placeholder="Enter Course Price"
+            placeholder="Enter Course Price (0 for free)"
             {...register("coursePrice", {
               required: true,
               valueAsNumber: true,
-              pattern: {
-                value: /^(0|[1-9]\d*)(\.\d+)?$/,
-              },
+              min: { value: 0, message: "Price cannot be negative" },
             })}
             className="form-style w-full !pl-12"
           />
@@ -217,7 +222,7 @@ export default function CourseInformationForm() {
         </div>
         {errors.coursePrice && (
           <span className="ml-2 text-xs tracking-wide text-pink-200">
-            Course Price is required
+            {errors.coursePrice.message || "Course Price is required"}
           </span>
         )}
       </div>
@@ -245,6 +250,27 @@ export default function CourseInformationForm() {
         {errors.courseCategory && (
           <span className="ml-2 text-xs tracking-wide text-pink-200">
             Course Category is required
+          </span>
+        )}
+      </div>
+      {/* Course Level */}
+      <div className="flex flex-col space-y-2">
+        <label className="text-sm text-richblack-5" htmlFor="courseLevel">
+          Course Level <sup className="text-pink-200">*</sup>
+        </label>
+        <select
+          {...register("courseLevel", { required: true })}
+          defaultValue="Beginner"
+          id="courseLevel"
+          className="form-style w-full"
+        >
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+          <option value="Advanced">Advanced</option>
+        </select>
+        {errors.courseLevel && (
+          <span className="ml-2 text-xs tracking-wide text-pink-200">
+            Course Level is required
           </span>
         )}
       </div>
