@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import ProgressBar from "@ramonak/react-progress-bar"
-import { BiDotsVerticalRounded } from "react-icons/bi"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
+import { HiOutlineBookOpen, HiOutlineAcademicCap } from "react-icons/hi"
+import { Link } from "react-router-dom"
 
 import { getUserEnrolledCourses } from "../../../services/operations/profileAPI"
 
@@ -15,15 +16,8 @@ export default function EnrolledCourses() {
   useEffect(() => {
     ;(async () => {
       try {
-        const res = await getUserEnrolledCourses(token) // Getting all the published and the drafted courses
-
-        // Filtering the published course out
+        const res = await getUserEnrolledCourses(token)
         const filterPublishCourse = res.filter((ele) => ele.status !== "Draft")
-        // console.log(
-        //   "Viewing all the couse that is Published",
-        //   filterPublishCourse
-        // )
-
         setEnrolledCourses(filterPublishCourse)
       } catch (error) {
         console.log("Could not fetch enrolled courses.")
@@ -33,68 +27,96 @@ export default function EnrolledCourses() {
   }, [])
 
   return (
-    <>
-      <div className="text-3xl text-richblack-50">Enrolled Courses</div>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold text-richblack-5">Enrolled Courses</h1>
+
       {!enrolledCourses ? (
-        <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
+        <div className="grid min-h-[50vh] place-items-center">
           <div className="spinner"></div>
         </div>
       ) : !enrolledCourses.length ? (
-        <p className="grid h-[10vh] w-full place-content-center text-richblack-5">
-          You have not enrolled in any course yet.
-          {/* TODO: Modify this Empty State */}
-        </p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-richblack-600 bg-richblack-800 py-24">
+          <HiOutlineBookOpen className="text-5xl text-richblack-500" />
+          <p className="mt-4 text-xl font-bold text-richblack-5">
+            No courses yet
+          </p>
+          <p className="mt-2 text-sm text-richblack-400">
+            Browse our catalog and enroll in a course to get started
+          </p>
+          <Link
+            to="/catalog"
+            className="mt-6 rounded-lg bg-yellow-50 px-5 py-2.5 text-sm font-semibold text-richblack-900 hover:bg-yellow-25 transition-all"
+          >
+            Browse Courses
+          </Link>
+        </div>
       ) : (
-        <div className="my-8 text-richblack-5">
-          {/* Headings */}
-          <div className="flex rounded-t-lg bg-richblack-500 ">
-            <p className="w-[45%] px-5 py-3">Course Name</p>
-            <p className="w-1/4 px-2 py-3">Duration</p>
-            <p className="flex-1 px-2 py-3">Progress</p>
+        <div className="overflow-hidden rounded-xl border border-richblack-700">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 bg-richblack-700 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-richblack-300">
+            <p className="col-span-6">Course</p>
+            <p className="col-span-2 text-center">Duration</p>
+            <p className="col-span-4">Progress</p>
           </div>
-          {/* Course Names */}
+
+          {/* Rows */}
           {enrolledCourses.map((course, i, arr) => (
             <div
-              className={`flex items-center border border-richblack-700 ${
-                i === arr.length - 1 ? "rounded-b-lg" : "rounded-none"
-              }`}
               key={i}
+              className={`grid grid-cols-12 items-center gap-2 px-6 py-4 bg-richblack-800 hover:bg-richblack-750 transition-colors ${
+                i !== arr.length - 1 ? "border-b border-richblack-700" : ""
+              }`}
             >
+              {/* Course Info */}
               <div
-                className="flex w-[45%] cursor-pointer items-center gap-4 px-5 py-3"
-                onClick={() => {
+                className="col-span-6 flex cursor-pointer items-center gap-4"
+                onClick={() =>
                   navigate(
                     `/view-course/${course?._id}/section/${course.courseContent?.[0]?._id}/sub-section/${course.courseContent?.[0]?.subSection?.[0]?._id}`
                   )
-                }}
+                }
               >
                 <img
                   src={course.thumbnail}
                   alt="course_img"
-                  className="h-14 w-14 rounded-lg object-cover"
+                  className="h-16 w-24 rounded-lg object-cover shrink-0"
                 />
-                <div className="flex max-w-xs flex-col gap-2">
-                  <p className="font-semibold">{course.courseName}</p>
-                  <p className="text-xs text-richblack-300">
-                    {course.courseDescription.length > 50
-                      ? `${course.courseDescription.slice(0, 50)}...`
-                      : course.courseDescription}
+                <div>
+                  <p className="font-semibold text-richblack-5 hover:text-yellow-50 transition-colors">
+                    {course.courseName}
+                  </p>
+                  <p className="mt-1 text-xs text-richblack-400 line-clamp-2">
+                    {course.courseDescription}
                   </p>
                 </div>
               </div>
-              <div className="w-1/4 px-2 py-3">{course?.totalDuration}</div>
-              <div className="flex w-1/5 flex-col gap-2 px-2 py-3">
-                <p>Progress: {course.progressPercentage || 0}%</p>
+
+              {/* Duration */}
+              <div className="col-span-2 text-center text-sm text-richblack-300">
+                {course?.totalDuration || "—"}
+              </div>
+
+              {/* Progress */}
+              <div className="col-span-4 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-richblack-400">Progress</span>
+                  <span className="text-xs font-semibold text-richblack-100">
+                    {course.progressPercentage || 0}%
+                  </span>
+                </div>
                 <ProgressBar
                   completed={course.progressPercentage || 0}
-                  height="8px"
+                  height="6px"
                   isLabelVisible={false}
+                  bgColor="#FFD60A"
+                  baseBgColor="#2C333F"
                 />
                 {course.progressPercentage === 100 && (
                   <button
                     onClick={() => navigate(`/certificate/${course._id}`)}
-                    className="mt-1 w-fit rounded-md bg-yellow-50 px-3 py-1 text-xs font-bold text-richblack-900 hover:opacity-90"
+                    className="mt-1 flex items-center gap-1 rounded-md bg-caribbeangreen-600 px-3 py-1 text-xs font-bold text-white hover:bg-caribbeangreen-500 transition-colors"
                   >
+                    <HiOutlineAcademicCap />
                     Get Certificate
                   </button>
                 )}
@@ -103,6 +125,6 @@ export default function EnrolledCourses() {
           ))}
         </div>
       )}
-    </>
+    </div>
   )
 }
