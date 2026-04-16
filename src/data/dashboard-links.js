@@ -70,4 +70,11 @@ export const sidebarLinks = [
     type: ACCOUNT_TYPE.ADMIN,
     icon: "VscTools",
   },
+  {
+    id: 12,
+    name: "Analytics",
+    path: "/dashboard/admin-analytics",
+    type: ACCOUNT_TYPE.ADMIN,
+    icon: "VscGraph",
+  },
 ]
