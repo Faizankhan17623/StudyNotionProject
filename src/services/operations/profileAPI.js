@@ -51,7 +51,7 @@ export function getUserDetails(token, navigate) {
     } catch (error) {
       dispatch(logout(navigate))
       console.log("GET_USER_DETAILS API ERROR............", error)
-      toast.error("Could Not Get User Details")
+      toast.error(error.message || "Could not fetch user details.")
     }
     toast.dismiss(toastId)
     dispatch(setLoading(false))
@@ -76,7 +76,7 @@ export async function getUserEnrolledCourses(token) {
     result = response.data.data
   } catch (error) {
     console.log("GET_USER_ENROLLED_COURSES_API API ERROR............", error)
-    toast.error("Could Not Get Enrolled Courses")
+    toast.error(error.message || "Could not load enrolled courses.")
   }
   toast.dismiss(toastId)
   return result
@@ -93,7 +93,7 @@ export async function getInstructorData(token) {
     result = response?.data?.courses
   } catch (error) {
     console.log("GET_INSTRUCTOR_DATA_API API ERROR............", error)
-    toast.error("Could Not Get Instructor Data")
+    toast.error(error.message || "Could not load instructor data.")
   }
   toast.dismiss(toastId)
   return result
@@ -127,7 +127,7 @@ export function updateDisplayPicture(token, formData) {
       dispatch(setUser(response.data.data))
     } catch (error) {
       console.log("UPDATE_DISPLAY_PICTURE_API API ERROR............", error)
-      toast.error("Could Not Update Display Picture")
+      toast.error(error.message || "Could not update display picture.")
     }
     toast.dismiss(toastId)
   }
@@ -153,7 +153,7 @@ export function updateProfile(token, formData) {
       toast.success("Profile Updated Successfully")
     } catch (error) {
       console.log("UPDATE_PROFILE_API API ERROR............", error)
-      toast.error("Could Not Update Profile")
+      toast.error(error.message || "Could not update profile.")
     }
     toast.dismiss(toastId)
   }
@@ -172,7 +172,7 @@ export async function changePassword(token, formData) {
     toast.success("Password Changed Successfully")
   } catch (error) {
     console.log("CHANGE_PASSWORD_API API ERROR............", error)
-    toast.error(error.response.data.message)
+    toast.error(error.message || "Could not change password. Please try again.")
   }
   toast.dismiss(toastId)
 }
@@ -192,7 +192,7 @@ export function deleteProfile(token, navigate) {
       dispatch(logout(navigate))
     } catch (error) {
       console.log("DELETE_PROFILE_API API ERROR............", error)
-      toast.error("Could Not Delete Profile")
+      toast.error(error.message || "Could not delete profile.")
     }
     toast.dismiss(toastId)
   }
