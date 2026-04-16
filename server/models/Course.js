@@ -53,6 +53,23 @@ const coursesSchema = new mongoose.Schema({
     type: String,
     default: "English",
   },
+  level: {
+    type: String,
+    enum: ["Beginner", "Intermediate", "Advanced"],
+    default: "Beginner",
+  },
+  averageRating: {
+    type: Number,
+    default: 0,
+  },
+  totalDuration: {
+    type: Number,
+    default: 0,
+  },
+  totalLectures: {
+    type: Number,
+    default: 0,
+  },
   status: {
     type: String,
     enum: ["Draft", "Published"],
@@ -64,6 +81,10 @@ const coursesSchema = new mongoose.Schema({
 coursesSchema.index({ courseName: "text", courseDescription: "text", tag: "text" })
 // Index: speeds up getAllCourses, getInstructorCourses
 coursesSchema.index({ status: 1, instructor: 1 })
+// Index: speeds up rating-based filtering and sorting
+coursesSchema.index({ averageRating: -1 })
+// Index: speeds up level and language filtering
+coursesSchema.index({ level: 1, language: 1 })
 
 // Export the Courses model
 module.exports = mongoose.model("Course", coursesSchema)
