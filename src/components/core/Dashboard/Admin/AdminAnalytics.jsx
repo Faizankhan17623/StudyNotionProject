@@ -7,10 +7,12 @@ import {
   HiOutlineUsers,
   HiOutlineAcademicCap,
   HiOutlineTrendingUp,
+  HiOutlineEye,
+  HiOutlineGlobe,
 } from "react-icons/hi"
 
 import { apiConnector } from "../../../../services/apiConnector"
-import { adminEndpoints } from "../../../../services/apis"
+import { adminEndpoints, analyticsEndpoints } from "../../../../services/apis"
 
 Chart.register(...registerables)
 
@@ -61,6 +63,7 @@ export default function AdminAnalytics() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeChart, setActiveChart] = useState("revenue")
+  const [liveStats, setLiveStats] = useState(null)
 
   useEffect(() => {
     ;(async () => {
@@ -77,6 +80,26 @@ export default function AdminAnalytics() {
       }
       setLoading(false)
     })()
+  }, [token])
+
+  // Fetch live stats and auto-refresh every 30 seconds
+  useEffect(() => {
+    const fetchLive = async () => {
+      try {
+        const res = await apiConnector(
+          "GET",
+          analyticsEndpoints.GET_LIVE_STATS_API,
+          null,
+          { Authorization: `Bearer ${token}` }
+        )
+        if (res?.data?.success) setLiveStats(res.data.data)
+      } catch (err) {
+        console.error("Live stats fetch error:", err)
+      }
+    }
+    fetchLive()
+    const interval = setInterval(fetchLive, 30 * 1000)
+    return () => clearInterval(interval)
   }, [token])
 
   if (loading) {
@@ -165,6 +188,56 @@ export default function AdminAnalytics() {
         <p className="mt-1 text-sm text-richblack-400">
           Revenue, enrollments and course performance across the entire platform
         </p>
+      </div>
+
+      {/* Live stats — refreshes every 30 seconds */}
+      <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-caribbeangreen-300 opacity-75"></span>
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-caribbeangreen-400"></span>
+          </span>
+          <h2 className="text-sm font-semibold text-richblack-100">Live Right Now</h2>
+          <span className="ml-auto text-xs text-richblack-500">auto-refreshes every 30s</span>
+        </div>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatCard
+            icon={<HiOutlineUsers className="text-2xl text-caribbeangreen-200" />}
+            label="Online Now"
+            value={liveStats ? liveStats.totalOnline : "—"}
+            sub={liveStats ? `${liveStats.loggedInOnline} logged in · ${liveStats.guestOnline} guests` : "loading..."}
+            color="bg-caribbeangreen-900"
+          />
+          <StatCard
+            icon={<HiOutlineEye className="text-2xl text-blue-200" />}
+            label="Today's Views"
+            value={liveStats ? liveStats.todayViews.toLocaleString() : "—"}
+            sub="page visits today"
+            color="bg-blue-900"
+          />
+          <StatCard
+            icon={<HiOutlineGlobe className="text-2xl text-yellow-50" />}
+            label="All-Time Views"
+            value={liveStats ? liveStats.allTimeViews.toLocaleString() : "—"}
+            sub="total page visits"
+            color="bg-yellow-900"
+          />
+          {/* Top page visited today */}
+          <div className="flex items-center gap-4 rounded-xl border border-richblack-700 bg-richblack-700 p-5">
+            <div className="rounded-xl bg-pink-900 p-3">
+              <HiOutlineTrendingUp className="text-2xl text-pink-200" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm text-richblack-400">Top Page Today</p>
+              <p className="truncate text-sm font-bold text-richblack-5">
+                {liveStats?.topPages?.[0]?.page || "—"}
+              </p>
+              <p className="text-xs text-richblack-500 mt-0.5">
+                {liveStats?.topPages?.[0] ? `${liveStats.topPages[0].visits} visits` : "no data yet"}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Overview stat cards */}
