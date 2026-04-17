@@ -33,13 +33,25 @@ app.set("trust proxy", 1);
 // Connecting to database
 database.connect();
 
+const allowedOrigins = [
+	"http://localhost:3000",
+	"http://localhost:5173",
+	process.env.FRONTEND_URL,
+].filter(Boolean);
+
+console.log("CORS allowed origins:", allowedOrigins);
+
 app.use(
 	cors({
-		origin: [
-			"http://localhost:3000",
-			"http://localhost:5173",
-			process.env.FRONTEND_URL,
-		].filter(Boolean),
+		origin: function (origin, callback) {
+			// allow requests with no origin (Postman, curl, server-to-server)
+			if (!origin) return callback(null, true);
+			if (allowedOrigins.includes(origin)) {
+				return callback(null, true);
+			}
+			console.error(`CORS blocked origin: ${origin}`);
+			return callback(new Error(`CORS policy: origin ${origin} not allowed`));
+		},
 		credentials: true,
 	})
 );
