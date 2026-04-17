@@ -121,3 +121,10 @@ export const questionEndpoints = {
   DOWNVOTE_QUESTION_API: BASE_URL + "/course/downvoteQuestion",
   RESOLVE_QUESTION_API: BASE_URL + "/course/resolveQuestion",
 }
+
+// LIVE ANALYTICS ENDPOINTS
+export const analyticsEndpoints = {
+  HEARTBEAT_API:    BASE_URL + "/analytics/heartbeat",
+  TRACK_PAGEVIEW_API: BASE_URL + "/analytics/pageview",
+  GET_LIVE_STATS_API: BASE_URL + "/analytics/live",
+}
