@@ -48,11 +48,15 @@ import { logout } from "./services/operations/authAPI"
 import { apiConnector } from "./services/apiConnector"
 import { maintenanceEndpoints } from "./services/apis"
 import { ACCOUNT_TYPE } from "./utils/constants"
+import useTracker from "./hooks/useTracker"
 
 function App() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { user, loading: profileLoading } = useSelector((state) => state.profile)
+
+  // Track page views and heartbeats silently in the background
+  useTracker()
 
   const [maintenanceData, setMaintenanceData] = useState(null)
 
