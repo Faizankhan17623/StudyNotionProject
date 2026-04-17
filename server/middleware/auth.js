@@ -69,3 +69,21 @@ exports.isInstructor = (req, res, next) => {
 	}
 	next();
 };
+
+// Optional auth — sets req.user if a valid token is present, but never rejects.
+// Use this on public endpoints that want to know WHO is calling, without requiring login.
+exports.optionalAuth = (req, res, next) => {
+	try {
+		const token =
+			req.cookies.token ||
+			req.body.token ||
+			req.header("Authorization")?.replace("Bearer ", "")
+		if (token) {
+			const decode = jwt.verify(token, process.env.JWT_SECRET)
+			req.user = decode
+		}
+	} catch {
+		// invalid / expired token — treat as guest, don't reject
+	}
+	next()
+}
