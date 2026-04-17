@@ -78,6 +78,9 @@ const userSchema = new mongoose.Schema(
     currentStreak:  { type: Number, default: 0 },
     longestStreak:  { type: Number, default: 0 },
     lastStudyDate:  { type: Date,   default: null },
+
+    // ── Visitor Tracking ─────────────────────────────────────────────────────
+    lastSeen: { type: Date, default: null },
   },
   { timestamps: true }
 )
