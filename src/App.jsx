@@ -21,6 +21,7 @@ import ReviewModeration from "./components/core/Dashboard/Admin/ReviewModeration
 import MaintenanceMode from "./components/core/Dashboard/Admin/MaintenanceMode"
 import AdminAnalytics from "./components/core/Dashboard/Admin/AdminAnalytics"
 import MaintenanceBanner from "./components/Common/MaintenanceBanner"
+import ScrollToTop from "./components/Common/ScrollToTop"
 import AnnouncementTicker from "./components/Common/AnnouncementTicker"
 import Settings from "./components/core/Dashboard/Settings"
 import Wishlist from "./pages/Wishlist"
@@ -119,6 +120,7 @@ function App() {
       {maintenanceData?.isActive && user?.accountType === ACCOUNT_TYPE.ADMIN && (
         <MaintenanceBanner data={maintenanceData} />
       )}
+      <ScrollToTop />
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
