@@ -24,25 +24,29 @@ function Home() {
       {/* Section 1 */}
       {/* <SpeedInsights/> */}
 
-      <div className="relative mx-auto flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 text-white">
+      <div className="relative mx-auto flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 text-white py-32">
+        {/* Ambient Glowing Orbs */}
+        <div className="ambient-orb ambient-orb-1 top-[-10%] left-[20%] w-[600px] h-[600px]"></div>
+        <div className="ambient-orb ambient-orb-2 top-[10%] right-[10%] w-[500px] h-[500px]" style={{animationDelay: '-5s'}}></div>
+
         {/* Become a Instructor Button */}
-        <Link to={"/signup"}>
-          <div className="group mx-auto mt-16 w-fit rounded-full bg-richblack-800 p-1 font-bold text-richblack-200 drop-shadow-[0_1.5px_rgba(255,255,255,0.25)] transition-all duration-200 hover:scale-95 hover:drop-shadow-none">
-            <div className="flex flex-row items-center gap-2 rounded-full px-10 py-[5px] transition-all duration-200 group-hover:bg-richblack-900">
+        <Link to={"/signup"} className="z-10">
+          <div className="group mx-auto w-fit rounded-full bg-richblack-800 p-1 font-bold text-richblack-200 drop-shadow-[0_1.5px_rgba(255,255,255,0.25)] transition-all duration-300 hover:scale-105 hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            <div className="flex flex-row items-center gap-2 rounded-full px-10 py-[5px] transition-all duration-300 group-hover:bg-richblack-900 border border-transparent group-hover:border-white/10">
               <p>Become an Instructor</p>
-              <FaArrowRight />
+              <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
         </Link>
 
         {/* Heading */}
-        <div className="text-center text-4xl font-semibold">
-          Empower Your Future with
+        <div className="text-center text-5xl md:text-7xl font-bold font-outfit tracking-tight animate-revealDown z-10 leading-tight">
+          Empower Your Future with <br/>
           <HighlightText text={"Coding Skills"} />
         </div>
 
         {/* Sub Heading */}
-        <div className="-mt-3 w-[90%] text-center text-lg font-bold text-richblack-300">
+        <div className="mt-4 w-[90%] md:w-[70%] text-center text-lg md:text-xl font-medium text-richblack-300 z-10 leading-relaxed">
           With our online coding courses, you can learn at your own pace, from
           anywhere in the world, and get access to a wealth of resources,
           including hands-on projects, quizzes, and personalized feedback from
@@ -50,7 +54,7 @@ function Home() {
         </div>
 
         {/* CTA Buttons */}
-        <div className="mt-8 flex flex-row gap-7">
+        <div className="mt-10 flex flex-row gap-7 z-10">
           <CTAButton active={true} linkto={"/signup"}>
             Learn More
           </CTAButton>
@@ -60,16 +64,28 @@ function Home() {
         </div>
 
 {/* <Analytics/> */}
-        {/* Video */}
-        <div className="mx-3 my-7 shadow-[10px_-5px_50px_-5px] shadow-blue-200">
-          <video
-            className="shadow-[20px_20px_rgba(255,255,255)]"
-            muted
-            loop
-            autoPlay
-          >
-            <source src={Banner} type="video/mp4" />
-          </video>
+        {/* Video Container - Floating Glass */}
+        <div className="mx-3 my-16 relative z-10 w-full max-w-[1000px] perspective-1000">
+          {/* Backlight glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-500/20 blur-[100px] z-[-1]"></div>
+          
+          <div className="mac-window rounded-2xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(31,162,255,0.5),0_0_0_1px_rgba(255,255,255,0.1)_inset] transform transition-transform duration-700 hover:scale-[1.02] hover:rotate-1 animate-revealUp">
+            <div className="mac-header">
+              <div className="mac-dot close"></div>
+              <div className="mac-dot min"></div>
+              <div className="mac-dot max"></div>
+            </div>
+            <div className="bg-[#050505] p-2">
+              <video
+                className="w-full h-auto rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.8)]"
+                muted
+                loop
+                autoPlay
+              >
+                <source src={Banner} type="video/mp4" />
+              </video>
+            </div>
+          </div>
         </div>
 
         {/* Code Section 1  */}
@@ -158,7 +174,7 @@ function Home() {
         <div className="mx-auto flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 ">
           {/* Job that is in Demand - Section 1 */}
           <div className="mb-10 mt-[-100px] flex flex-col justify-between gap-7 lg:mt-20 lg:flex-row lg:gap-0">
-            <div className="text-4xl font-semibold lg:w-[45%] ">
+            <div className="text-4xl font-semibold lg:w-[45%]">
               Get the skills you need for a{" "}
               <HighlightText text={"job that is in demand."} />
             </div>

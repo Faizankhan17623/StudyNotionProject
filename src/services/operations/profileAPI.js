@@ -34,7 +34,6 @@ export function getUserDetails(token, navigate) {
       const response = await apiConnector("GET", GET_USER_DETAILS_API, null, {
         Authorization: `Bearer ${token}`,
       })
-      console.log("GET_USER_DETAILS API RESPONSE............", response)
 
       if (!response.data.success) {
         throw new Error(response.data.message)
@@ -50,7 +49,6 @@ export function getUserDetails(token, navigate) {
       dispatch(setWishlist(wishlistIds))
     } catch (error) {
       dispatch(logout(navigate))
-      console.log("GET_USER_DETAILS API ERROR............", error)
       toast.error(error.message || "Could not fetch user details.")
     }
     toast.dismiss(toastId)
@@ -75,7 +73,6 @@ export async function getUserEnrolledCourses(token) {
     }
     result = response.data.data
   } catch (error) {
-    console.log("GET_USER_ENROLLED_COURSES_API API ERROR............", error)
     toast.error(error.message || "Could not load enrolled courses.")
   }
   toast.dismiss(toastId)
@@ -89,10 +86,8 @@ export async function getInstructorData(token) {
     const response = await apiConnector("GET", GET_INSTRUCTOR_DATA_API, null, {
       Authorization: `Bearer ${token}`,
     })
-    console.log("GET_INSTRUCTOR_DATA_API API RESPONSE............", response)
     result = response?.data?.courses
   } catch (error) {
-    console.log("GET_INSTRUCTOR_DATA_API API ERROR............", error)
     toast.error(error.message || "Could not load instructor data.")
   }
   toast.dismiss(toastId)
@@ -116,17 +111,12 @@ export function updateDisplayPicture(token, formData) {
           Authorization: `Bearer ${token}`,
         }
       )
-      console.log(
-        "UPDATE_DISPLAY_PICTURE_API API RESPONSE............",
-        response
-      )
       if (!response.data.success) {
         throw new Error(response.data.message)
       }
       toast.success("Display Picture Updated Successfully")
       dispatch(setUser(response.data.data))
     } catch (error) {
-      console.log("UPDATE_DISPLAY_PICTURE_API API ERROR............", error)
       toast.error(error.message || "Could not update display picture.")
     }
     toast.dismiss(toastId)
@@ -140,7 +130,6 @@ export function updateProfile(token, formData) {
       const response = await apiConnector("PUT", UPDATE_PROFILE_API, formData, {
         Authorization: `Bearer ${token}`,
       })
-      console.log("UPDATE_PROFILE_API API RESPONSE............", response)
       if (!response.data.success) {
         throw new Error(response.data.message)
       }
@@ -152,7 +141,6 @@ export function updateProfile(token, formData) {
       )
       toast.success("Profile Updated Successfully")
     } catch (error) {
-      console.log("UPDATE_PROFILE_API API ERROR............", error)
       toast.error(error.message || "Could not update profile.")
     }
     toast.dismiss(toastId)
@@ -165,13 +153,11 @@ export async function changePassword(token, formData) {
     const response = await apiConnector("POST", CHANGE_PASSWORD_API, formData, {
       Authorization: `Bearer ${token}`,
     })
-    console.log("CHANGE_PASSWORD_API API RESPONSE............", response)
     if (!response.data.success) {
       throw new Error(response.data.message)
     }
     toast.success("Password Changed Successfully")
   } catch (error) {
-    console.log("CHANGE_PASSWORD_API API ERROR............", error)
     toast.error(error.message || "Could not change password. Please try again.")
   }
   toast.dismiss(toastId)
@@ -184,14 +170,12 @@ export function deleteProfile(token, navigate) {
       const response = await apiConnector("DELETE", DELETE_PROFILE_API, null, {
         Authorization: `Bearer ${token}`,
       })
-      console.log("DELETE_PROFILE_API API RESPONSE............", response)
       if (!response.data.success) {
         throw new Error(response.data.message)
       }
       toast.success("Profile Deleted Successfully")
       dispatch(logout(navigate))
     } catch (error) {
-      console.log("DELETE_PROFILE_API API ERROR............", error)
       toast.error(error.message || "Could not delete profile.")
     }
     toast.dismiss(toastId)

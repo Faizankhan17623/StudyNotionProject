@@ -47,12 +47,12 @@ const CHART_DEFAULTS = {
 
 function StatCard({ icon, label, value, sub, color }) {
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-richblack-700 bg-richblack-800 p-5">
-      <div className={`rounded-xl p-3 ${color}`}>{icon}</div>
+    <div className="flex items-center gap-4 rounded-2xl border border-white/10 glass-card p-6 shadow-xl transition-transform hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+      <div className={`rounded-xl p-4 shadow-inner ${color}`}>{icon}</div>
       <div>
-        <p className="text-sm text-richblack-400">{label}</p>
-        <p className="text-2xl font-extrabold text-richblack-5">{value}</p>
-        {sub && <p className="text-xs text-richblack-500 mt-0.5">{sub}</p>}
+        <p className="text-sm font-medium text-richblack-300">{label}</p>
+        <p className="text-3xl font-bold font-outfit text-white">{value}</p>
+        {sub && <p className="text-xs text-richblack-400 mt-1">{sub}</p>}
       </div>
     </div>
   )
@@ -184,14 +184,14 @@ export default function AdminAnalytics() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-richblack-5">Platform Analytics</h1>
+        <h1 className="text-4xl font-bold font-outfit text-white">Platform Analytics</h1>
         <p className="mt-1 text-sm text-richblack-400">
           Revenue, enrollments and course performance across the entire platform
         </p>
       </div>
 
       {/* Live stats — refreshes every 30 seconds */}
-      <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-5">
+      <div className="rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp">
         <div className="mb-4 flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-caribbeangreen-300 opacity-75"></span>
@@ -273,7 +273,7 @@ export default function AdminAnalytics() {
       </div>
 
       {/* Monthly trend chart */}
-      <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+      <div className="rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp" style={{animationDelay: '0.1s'}}>
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-bold text-richblack-5">Monthly Trends (Last 12 Months)</h2>
           <div className="flex rounded-lg border border-richblack-600 overflow-hidden">
@@ -311,7 +311,7 @@ export default function AdminAnalytics() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
         {/* Top by Revenue */}
-        <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+        <div className="rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp" style={{animationDelay: '0.2s'}}>
           <h2 className="mb-4 text-lg font-bold text-richblack-5">Top 5 by Revenue</h2>
           {topCoursesByRevenue.length === 0 ? (
             <p className="text-sm text-richblack-500 text-center py-8">No data yet</p>
@@ -343,7 +343,7 @@ export default function AdminAnalytics() {
         </div>
 
         {/* Top by Enrollment */}
-        <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+        <div className="rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp" style={{animationDelay: '0.3s'}}>
           <h2 className="mb-4 text-lg font-bold text-richblack-5">Top 5 by Enrollments</h2>
           {topCoursesByEnrollment.length === 0 ? (
             <p className="text-sm text-richblack-500 text-center py-8">No data yet</p>

@@ -50,7 +50,6 @@ export async function EnrollFreeCourse(token, courses, navigate, dispatch) {
     navigate("/dashboard/enrolled-courses")
     dispatch(resetCart())
   } catch (error) {
-    console.log("FREE ENROLL ERROR............", error)
     toast.error(error.message || "Could not enroll. Please try again.")
   }
   toast.dismiss(toastId)
@@ -88,7 +87,6 @@ export async function BuyCourse(
     if (!orderResponse.data.success) {
       throw new Error(orderResponse.data.message)
     }
-    console.log("PAYMENT RESPONSE FROM BACKEND............", orderResponse.data)
 
     // Opening the Razorpay SDK
     const options = {
@@ -112,10 +110,8 @@ export async function BuyCourse(
     paymentObject.open()
     paymentObject.on("payment.failed", function (response) {
       toast.error("Oops! Payment Failed.")
-      console.log(response.error)
     })
   } catch (error) {
-    console.log("PAYMENT API ERROR............", error)
     toast.error(error.message || "Could not initiate payment. Please try again.")
   }
   toast.dismiss(toastId)
@@ -128,7 +124,6 @@ async function verifyPayment(bodyData, token, navigate, dispatch) {
     const response = await apiConnector("POST", COURSE_VERIFY_API, bodyData, {
       Authorization: `Bearer ${token}`,
     })
-    console.log("VERIFY PAYMENT RESPONSE FROM BACKEND............", response)
     if (!response.data.success) {
       throw new Error(response.data.message)
     }
@@ -136,7 +131,6 @@ async function verifyPayment(bodyData, token, navigate, dispatch) {
     navigate("/dashboard/enrolled-courses")
     dispatch(resetCart())
   } catch (error) {
-    console.log("PAYMENT VERIFY ERROR............", error)
     toast.error(error.message || "Payment verification failed. Please contact support.")
   }
   toast.dismiss(toastId)
@@ -156,6 +150,6 @@ async function sendPaymentSuccessEmail(response, amount, token) {
       { Authorization: `Bearer ${token}` }
     )
   } catch (error) {
-    console.log("PAYMENT SUCCESS EMAIL ERROR............", error)
+    // silent — email failure should not surface to the user
   }
 }

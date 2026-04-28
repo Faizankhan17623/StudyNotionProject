@@ -41,26 +41,26 @@ function Wishlist() {
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] py-10">
-      <div className="flex items-center gap-3 mb-8">
-        <FaHeart className="text-2xl text-red-500" />
-        <h1 className="text-3xl font-bold text-richblack-5">My Wishlist</h1>
-        <span className="rounded-full bg-richblack-700 px-3 py-1 text-sm text-richblack-200">
+      <div className="flex items-center gap-3 mb-14">
+        <FaHeart className="text-3xl text-red-500" />
+        <h1 className="text-4xl font-bold font-outfit text-white">My Wishlist</h1>
+        <span className="rounded-full bg-white/10 px-4 py-1 text-sm font-semibold text-richblack-200 ml-4">
           {courses.length} {courses.length === 1 ? "course" : "courses"}
         </span>
       </div>
 
       {courses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <AiOutlineHeart className="mb-4 text-7xl text-richblack-600" />
-          <h3 className="mb-2 text-xl font-semibold text-richblack-100">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-white/20 glass-card py-24 text-center shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+          <AiOutlineHeart className="mb-4 text-7xl text-richblack-500" />
+          <h3 className="mb-2 text-2xl font-bold font-outfit text-white">
             Your wishlist is empty
           </h3>
-          <p className="mb-6 text-richblack-400">
+          <p className="mb-8 text-richblack-400 max-w-sm">
             Browse courses and click the heart icon to save them here.
           </p>
           <Link
             to="/"
-            className="rounded-lg bg-yellow-50 px-6 py-3 font-semibold text-richblack-900 hover:bg-yellow-25 transition-colors"
+            className="rounded-full bg-yellow-50 px-8 py-3 font-bold text-richblack-900 hover:bg-yellow-25 hover:shadow-[0_0_20px_rgba(255,214,10,0.5)] transition-all"
           >
             Browse Courses
           </Link>
@@ -72,7 +72,7 @@ function Wishlist() {
             return (
               <div
                 key={course._id}
-                className="flex flex-col gap-4 rounded-xl border border-richblack-700 bg-richblack-800 p-4 sm:flex-row sm:items-center sm:gap-6"
+                className="flex flex-col gap-4 rounded-2xl border border-white/10 glass-card p-6 sm:flex-row sm:items-center sm:gap-8 hover:bg-white/5 hover:border-white/30 transition-all duration-300 shadow-xl"
               >
                 {/* Thumbnail */}
                 <Link to={`/courses/${course._id}`} className="flex-shrink-0">

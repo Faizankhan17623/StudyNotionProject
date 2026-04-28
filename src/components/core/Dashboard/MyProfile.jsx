@@ -103,7 +103,7 @@ export default function MyProfile() {
       )}
 
       {/* Profile Header Card */}
-      <div className="flex items-center justify-between rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+      <div className="flex items-center justify-between rounded-2xl border border-white/10 glass-card p-8 animate-revealUp shadow-xl">
         <div className="flex items-center gap-5">
           <div className="relative">
             <img
@@ -132,7 +132,7 @@ export default function MyProfile() {
       </div>
 
       {/* About Section */}
-      <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+      <div className="rounded-2xl border border-white/10 glass-card p-8 animate-revealUp shadow-xl" style={{animationDelay: '0.1s'}}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-richblack-5">About</h2>
           <IconBtn
@@ -154,7 +154,7 @@ export default function MyProfile() {
       </div>
 
       {/* Personal Details */}
-      <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+      <div className="rounded-2xl border border-white/10 glass-card p-8 animate-revealUp shadow-xl" style={{animationDelay: '0.2s'}}>
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-bold text-richblack-5">Personal Details</h2>
           <IconBtn

@@ -19,10 +19,10 @@ export default function SidebarLink({ link, iconName }) {
     <NavLink
       to={link.path}
       onClick={() => dispatch(resetCourseState())}
-      className={`relative mx-2 flex items-center gap-x-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ${
+      className={`relative mx-2 flex items-center gap-x-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-300 ${
         isActive
-          ? "bg-yellow-800 text-yellow-50"
-          : "text-richblack-300 hover:bg-richblack-700 hover:text-richblack-50"
+          ? "bg-yellow-800/40 text-yellow-50 shadow-[inset_2px_0_0_#FFD60A,0_0_15px_rgba(255,214,10,0.15)]"
+          : "text-richblack-300 hover:bg-richblack-700/50 hover:text-richblack-50 hover:translate-x-1"
       }`}
     >
       {isActive && (

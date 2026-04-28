@@ -1,7 +1,9 @@
 // Import necessary modules
 const Section = require("../models/Section")
 const SubSection = require("../models/Subsection")
+const Course = require("../models/Course")
 const { uploadImageToCloudinary } = require("../utils/imageUploader")
+const { createNotification } = require("./Notification")
 
 // Create a new sub-section for a given section
 exports.createSubSection = async (req, res) => {
@@ -38,6 +40,21 @@ exports.createSubSection = async (req, res) => {
       { $push: { subSection: SubSectionDetails._id } },
       { new: true }
     ).populate("subSection")
+
+    // Notify all enrolled students about the new lecture
+    const parentCourse = await Course.findOne({ courseContent: sectionId })
+      .select("courseName studentsEnroled")
+    if (parentCourse && parentCourse.studentsEnroled.length > 0) {
+      for (const studentId of parentCourse.studentsEnroled) {
+        createNotification(
+          studentId,
+          "new_lecture",
+          "New lecture added",
+          `A new lecture "${title}" was added to "${parentCourse.courseName}"`,
+          `/dashboard/enrolled-courses`
+        )
+      }
+    }
 
     // Return the updated section in the response
     return res.status(200).json({ success: true, data: updatedSection })

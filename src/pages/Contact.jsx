@@ -8,14 +8,17 @@ import ContactForm from "../components/core/ContactUsPage/ContactForm"
 const Contact = () => {
   return (
     <div>
-      <div className="mx-auto mt-20 flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-white lg:flex-row">
+      <div className="relative mx-auto mt-20 flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-white lg:flex-row py-16">
+        {/* Ambient Glow */}
+        <div className="ambient-orb ambient-orb-1 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px]"></div>
+        
         {/* Contact Details */}
-        <div className="lg:w-[40%]">
+        <div className="lg:w-[40%] glass-card p-8 rounded-3xl z-10 animate-revealUp">
           <ContactDetails />
         </div>
 
         {/* Contact Form */}
-        <div className="lg:w-[60%]">
+        <div className="lg:w-[60%] glass-card p-8 rounded-3xl z-10 animate-revealDown">
           <ContactForm />
         </div>
       </div>

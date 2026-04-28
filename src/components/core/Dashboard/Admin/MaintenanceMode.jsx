@@ -121,7 +121,7 @@ function MaintenanceMode() {
       <div className="mb-8 flex items-center gap-3">
         <FiTool className="text-3xl text-yellow-50" />
         <div>
-          <h1 className="text-3xl font-bold text-richblack-5">Maintenance Mode</h1>
+          <h1 className="text-4xl font-bold font-outfit text-white">Maintenance Mode</h1>
           <p className="text-sm text-richblack-400">
             Enable maintenance mode to show a banner across the site and notify all users
           </p>
@@ -130,7 +130,7 @@ function MaintenanceMode() {
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         {/* Left: Toggle & settings */}
-        <div className="flex-1 rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+        <div className="flex-1 rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp">
           <h2 className="mb-5 text-lg font-semibold text-richblack-5">Banner Settings</h2>
 
           {/* Toggle */}
@@ -200,7 +200,7 @@ function MaintenanceMode() {
         </div>
 
         {/* Right: Notify all users */}
-        <div className="flex-1 rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+        <div className="flex-1 rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp" style={{animationDelay: '0.1s'}}>
           <div className="mb-5 flex items-center gap-2">
             <FiBell className="text-yellow-50" />
             <h2 className="text-lg font-semibold text-richblack-5">

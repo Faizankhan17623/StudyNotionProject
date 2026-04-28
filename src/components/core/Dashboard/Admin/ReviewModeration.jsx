@@ -86,7 +86,7 @@ function ReviewModeration() {
       <div className="mb-8 flex items-center gap-3">
         <MdReviews className="text-3xl text-yellow-50" />
         <div>
-          <h1 className="text-3xl font-bold text-richblack-5">Review Moderation</h1>
+          <h1 className="text-4xl font-bold font-outfit text-white">Review Moderation</h1>
           <p className="text-sm text-richblack-400">
             {pagination ? pagination.totalReviews : reviews.length} total reviews — delete spam or inappropriate reviews
           </p>
@@ -103,7 +103,7 @@ function ReviewModeration() {
           {reviews.map((review) => (
             <div
               key={review._id}
-              className="flex flex-col gap-3 rounded-xl border border-richblack-700 bg-richblack-800 p-5 sm:flex-row sm:items-start sm:justify-between"
+              className="flex flex-col gap-4 rounded-2xl border border-white/10 glass-card p-6 sm:flex-row sm:items-start sm:justify-between hover:bg-white/5 transition-all duration-300 shadow-xl"
             >
               {/* Left: user + review */}
               <div className="flex flex-1 gap-4">

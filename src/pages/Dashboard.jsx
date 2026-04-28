@@ -16,9 +16,12 @@ function Dashboard() {
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-3.5rem)] bg-richblack-900">
+    <div className="relative flex min-h-[calc(100vh-3.5rem)] bg-[#020202] overflow-hidden">
+      {/* Global Dashboard Ambient Glow */}
+      <div className="ambient-orb ambient-orb-1 top-[20%] left-[30%] w-[800px] h-[800px] pointer-events-none z-0"></div>
+      
       <Sidebar />
-      <div className="h-[calc(100vh-3.5rem)] flex-1 overflow-auto">
+      <div className="h-[calc(100vh-3.5rem)] flex-1 overflow-auto relative z-10">
         <div className="mx-auto w-11/12 max-w-[1000px] py-10">
           <Outlet />
         </div>

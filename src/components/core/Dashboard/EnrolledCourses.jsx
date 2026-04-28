@@ -35,9 +35,9 @@ export default function EnrolledCourses() {
           <div className="spinner"></div>
         </div>
       ) : !enrolledCourses.length ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-richblack-600 bg-richblack-800 py-24">
-          <HiOutlineBookOpen className="text-5xl text-richblack-500" />
-          <p className="mt-4 text-xl font-bold text-richblack-5">
+        <div className="flex flex-col items-center justify-center rounded-2xl glass-card border border-dashed border-white/20 py-24 shadow-xl">
+          <HiOutlineBookOpen className="text-6xl text-richblack-500 mb-4" />
+          <p className="mt-4 text-2xl font-bold font-outfit text-white">
             No courses yet
           </p>
           <p className="mt-2 text-sm text-richblack-400">
@@ -45,15 +45,15 @@ export default function EnrolledCourses() {
           </p>
           <Link
             to="/catalog"
-            className="mt-6 rounded-lg bg-yellow-50 px-5 py-2.5 text-sm font-semibold text-richblack-900 hover:bg-yellow-25 transition-all"
+            className="mt-6 rounded-full bg-yellow-50 px-6 py-3 text-sm font-bold text-richblack-900 hover:bg-yellow-25 hover:shadow-[0_0_15px_rgba(255,214,10,0.5)] transition-all"
           >
             Browse Courses
           </Link>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-richblack-700">
+        <div className="overflow-hidden rounded-2xl glass-card border border-white/10 shadow-2xl animate-revealUp">
           {/* Table Header */}
-          <div className="grid grid-cols-12 bg-richblack-700 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-richblack-300">
+          <div className="grid grid-cols-12 bg-[#050505]/50 px-6 py-4 text-xs font-semibold uppercase tracking-wider text-richblack-300 border-b border-white/5">
             <p className="col-span-6">Course</p>
             <p className="col-span-2 text-center">Duration</p>
             <p className="col-span-4">Progress</p>
@@ -63,8 +63,8 @@ export default function EnrolledCourses() {
           {enrolledCourses.map((course, i, arr) => (
             <div
               key={i}
-              className={`grid grid-cols-12 items-center gap-2 px-6 py-4 bg-richblack-800 hover:bg-richblack-750 transition-colors ${
-                i !== arr.length - 1 ? "border-b border-richblack-700" : ""
+              className={`grid grid-cols-12 items-center gap-2 px-6 py-5 bg-transparent hover:bg-white/5 transition-all duration-300 ${
+                i !== arr.length - 1 ? "border-b border-white/5" : ""
               }`}
             >
               {/* Course Info */}

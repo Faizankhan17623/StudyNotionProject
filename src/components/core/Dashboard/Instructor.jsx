@@ -89,17 +89,18 @@ export default function Instructor() {
         <>
           {/* Stats Cards */}
           <div className="grid grid-cols-3 gap-4">
-            {stats.map((stat) => (
+            {stats.map((stat, i) => (
               <div
                 key={stat.label}
-                className="flex items-center gap-4 rounded-xl border border-richblack-700 bg-richblack-800 p-5"
+                className="flex items-center gap-4 rounded-2xl border border-white/10 glass-card p-6 shadow-xl animate-revealUp transition-all hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                style={{animationDelay: `${i * 0.1}s`}}
               >
-                <div className={`rounded-lg p-3 ${stat.bg}`}>
+                <div className={`rounded-xl p-4 shadow-inner ${stat.bg}`}>
                   {stat.icon}
                 </div>
                 <div>
-                  <p className="text-sm text-richblack-400">{stat.label}</p>
-                  <p className="text-2xl font-bold text-richblack-5">{stat.value}</p>
+                  <p className="text-sm font-medium text-richblack-300">{stat.label}</p>
+                  <p className="text-3xl font-bold font-outfit text-white">{stat.value}</p>
                 </div>
               </div>
             ))}
@@ -108,10 +109,12 @@ export default function Instructor() {
           {/* Chart */}
           <div className="flex gap-4">
             {totalAmount > 0 || totalStudents > 0 ? (
-              <InstructorChart courses={instructorData} />
+              <div className="glass-card border border-white/10 rounded-2xl p-4 flex-1">
+                <InstructorChart courses={instructorData} />
+              </div>
             ) : (
-              <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-richblack-700 bg-richblack-800 py-16">
-                <p className="text-lg font-bold text-richblack-5">No Data Yet</p>
+              <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 glass-card py-20">
+                <p className="text-2xl font-bold font-outfit text-white">No Data Yet</p>
                 <p className="mt-2 text-sm text-richblack-400">
                   Enroll students to see analytics
                 </p>
@@ -120,37 +123,37 @@ export default function Instructor() {
           </div>
 
           {/* Courses Preview */}
-          <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-6">
-            <div className="mb-5 flex items-center justify-between">
-              <p className="text-lg font-bold text-richblack-5">Your Courses</p>
+          <div className="rounded-2xl border border-white/10 glass-card p-8 animate-revealUp shadow-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <p className="text-2xl font-bold font-outfit text-white">Your Courses</p>
               <Link
                 to="/dashboard/my-courses"
-                className="text-xs font-semibold text-yellow-50 hover:text-yellow-25 transition-colors"
+                className="text-sm font-semibold text-yellow-50 hover:text-yellow-25 transition-colors underline underline-offset-4"
               >
                 View All →
               </Link>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-6">
               {courses.slice(0, 3).map((course) => (
                 <Link
                   to={`/dashboard/edit-course/${course._id}`}
                   key={course._id}
-                  className="group rounded-lg border border-richblack-700 overflow-hidden hover:border-yellow-500 transition-all duration-200"
+                  className="group rounded-2xl border border-white/5 bg-[#050505] overflow-hidden hover:border-yellow-500/50 hover:shadow-[0_0_20px_rgba(255,214,10,0.15)] transition-all duration-300"
                 >
                   <img
                     src={course.thumbnail}
                     alt={course.courseName}
-                    className="h-36 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="h-40 w-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="p-3">
-                    <p className="text-sm font-semibold text-richblack-50 line-clamp-1">
+                  <div className="p-4 border-t border-white/5">
+                    <p className="text-base font-semibold text-richblack-50 line-clamp-1">
                       {course.courseName}
                     </p>
-                    <div className="mt-2 flex items-center justify-between">
-                      <p className="text-xs text-richblack-400">
+                    <div className="mt-3 flex items-center justify-between">
+                      <p className="text-xs font-medium text-richblack-400">
                         {course.studentsEnroled.length} students
                       </p>
-                      <p className="text-xs font-semibold text-yellow-50">
+                      <p className="text-sm font-bold text-yellow-50">
                         ₹{course.price}
                       </p>
                     </div>
@@ -161,9 +164,9 @@ export default function Instructor() {
           </div>
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-richblack-600 bg-richblack-800 py-24">
-          <HiOutlineAcademicCap className="text-5xl text-richblack-500" />
-          <p className="mt-4 text-xl font-bold text-richblack-5">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 glass-card py-24 shadow-xl">
+          <HiOutlineAcademicCap className="text-6xl text-richblack-500 mb-4" />
+          <p className="mt-4 text-2xl font-bold font-outfit text-white">
             No courses yet
           </p>
           <p className="mt-2 text-sm text-richblack-400">
@@ -171,7 +174,7 @@ export default function Instructor() {
           </p>
           <Link
             to="/dashboard/add-course"
-            className="mt-6 flex items-center gap-2 rounded-lg bg-yellow-50 px-5 py-2.5 text-sm font-semibold text-richblack-900 hover:bg-yellow-25 transition-all"
+            className="mt-6 flex items-center gap-2 rounded-full bg-yellow-50 px-6 py-3 text-sm font-bold text-richblack-900 hover:bg-yellow-25 hover:shadow-[0_0_15px_rgba(255,214,10,0.5)] transition-all"
           >
             <HiOutlinePlusCircle className="text-lg" />
             Create a Course

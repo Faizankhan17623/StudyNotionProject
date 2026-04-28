@@ -58,18 +58,21 @@ function Catalog() {
   return (
     <>
       {/* Hero Section */}
-      <div className=" box-content bg-richblack-800 px-4">
-        <div className="mx-auto flex min-h-[260px] max-w-maxContentTab flex-col justify-center gap-4 lg:max-w-maxContent ">
-          <p className="text-sm text-richblack-300">
+      <div className="relative box-content bg-[#050505] px-4 py-24 overflow-hidden border-b border-white/10">
+        {/* Ambient Glow */}
+        <div className="ambient-orb ambient-orb-1 top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px]"></div>
+        
+        <div className="relative z-10 mx-auto flex min-h-[260px] max-w-maxContentTab flex-col justify-center gap-6 lg:max-w-maxContent animate-revealDown">
+          <p className="text-sm text-richblack-300 font-medium tracking-wider uppercase">
             {`Home / Catalog / `}
-            <span className="text-yellow-25">
+            <span className="text-yellow-50 font-bold">
               {catalogPageData?.data?.selectedCategory?.name}
             </span>
           </p>
-          <p className="text-3xl text-richblack-5">
+          <p className="text-5xl md:text-7xl font-bold font-outfit text-gradient-yellow">
             {catalogPageData?.data?.selectedCategory?.name}
           </p>
-          <p className="max-w-[870px] text-richblack-200">
+          <p className="max-w-[870px] text-lg text-richblack-200 leading-relaxed">
             {catalogPageData?.data?.selectedCategory?.description}
           </p>
         </div>

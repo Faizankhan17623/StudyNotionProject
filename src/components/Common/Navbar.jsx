@@ -11,6 +11,7 @@ import { apiConnector } from "../../services/apiConnector"
 import { categories } from "../../services/apis"
 import { ACCOUNT_TYPE } from "../../utils/constants"
 import ProfileDropdown from "../core/Auth/ProfileDropdown"
+import NotificationBell from "./NotificationBell"
 
 
 function Navbar() {
@@ -76,12 +77,12 @@ function Navbar() {
     <div
       className={`flex h-14 items-center justify-center border-b-[1px] border-b-richblack-700 ${
         location.pathname !== "/" ? "bg-richblack-800" : ""
-      } transition-all duration-200`}
+      } transition-all duration-200 sticky top-0 z-[100] backdrop-blur-md bg-richblack-900/80`}
     >
       <div className="flex w-11/12 max-w-maxContent items-center justify-between">
         {/* Logo */}
         <Link to="/">
-          <img src={logo} alt="Logo" width={160} height={32} loading="lazy" />
+          <img src={logo} alt="Logo" width={160} height={32} loading="lazy" className="transition-transform duration-300 hover:scale-105" />
         </Link>
         {/* Navigation links */}
         <nav className="hidden md:block">
@@ -180,6 +181,7 @@ function Navbar() {
               )}
             </Link>
           )}
+          {token !== null && <NotificationBell />}
           {token === null && (
             <Link to="/login">
               <button className="rounded-[8px] border border-richblack-700 bg-richblack-800 px-[12px] py-[8px] text-richblack-100">

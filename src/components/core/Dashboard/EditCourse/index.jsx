@@ -41,10 +41,10 @@ export default function EditCourse() {
 
   return (
     <div>
-      <h1 className="mb-14 text-3xl font-medium text-richblack-5">
+      <h1 className="mb-14 text-4xl font-bold font-outfit text-white">
         Edit Course
       </h1>
-      <div className="mx-auto max-w-[600px]">
+      <div className="mx-auto max-w-[600px] glass-card p-8 rounded-3xl border border-white/10 shadow-2xl">
         {course ? (
           <RenderSteps />
         ) : (

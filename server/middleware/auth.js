@@ -22,7 +22,6 @@ exports.auth = async (req, res, next) => {
 		try {
 			// Verifying the JWT using the secret key stored in environment variables
 			const decode = await jwt.verify(token, process.env.JWT_SECRET);
-// console.log(decode);
 			// Storing the decoded JWT payload in the request object for further use
 			req.user = decode;
 		} catch (error) {
@@ -31,6 +30,16 @@ exports.auth = async (req, res, next) => {
 				.status(401)
 				.json({ success: false, message: "token is invalid" });
 		}
+
+		// Verify account is still active in the database
+		const user = await User.findById(req.user.id).select("active approved accountType");
+		if (!user || !user.active) {
+			return res.status(403).json({
+				success: false,
+				message: "Your account has been deactivated. Please contact support.",
+			});
+		}
+		req.user.approved = user.approved;
 
 		// If JWT is valid, move on to the next middleware or request handler
 		next();
@@ -65,6 +74,12 @@ exports.isInstructor = (req, res, next) => {
 		return res.status(401).json({
 			success: false,
 			message: "This is a Protected Route for Instructor",
+		});
+	}
+	if (!req.user?.approved) {
+		return res.status(403).json({
+			success: false,
+			message: "Your instructor account is pending admin approval.",
 		});
 	}
 	next();

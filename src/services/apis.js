@@ -128,3 +128,10 @@ export const analyticsEndpoints = {
   TRACK_PAGEVIEW_API: BASE_URL + "/analytics/pageview",
   GET_LIVE_STATS_API: BASE_URL + "/analytics/live",
 }
+
+// NOTIFICATION ENDPOINTS
+export const notificationEndpoints = {
+  GET_NOTIFICATIONS_API: BASE_URL + "/notifications",
+  MARK_READ_API:         BASE_URL + "/notifications/markRead",
+  MARK_ALL_READ_API:     BASE_URL + "/notifications/markAllRead",
+}

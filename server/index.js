@@ -15,6 +15,7 @@ const paymentRoutes = require("./routes/Payments");
 const contactUsRoute = require("./routes/Contact");
 const maintenanceRoutes = require("./routes/Maintenance");
 const analyticsRoutes = require("./routes/Analytics");
+const notificationRoutes = require("./routes/Notification");
 const database = require("./config/database");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -59,6 +60,8 @@ app.use(
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
+const mongoSanitize = require("express-mongo-sanitize");
+app.use(mongoSanitize());
 app.use(userAgent.express())
 app.use(morgan("dev"));
 
@@ -80,6 +83,7 @@ app.use("/api/v1/payment", paymentRoutes);
 app.use("/api/v1/reach", contactUsRoute);
 app.use("/api/v1/maintenance", maintenanceRoutes);
 app.use("/api/v1/analytics",  analyticsRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 
 // Testing the server
 app.get("/", (req, res) => {

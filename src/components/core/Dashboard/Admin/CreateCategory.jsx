@@ -49,7 +49,7 @@ export default function CreateCategory() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-richblack-5">
+          <h1 className="text-4xl font-bold font-outfit text-white">
             Manage Categories
           </h1>
           <p className="mt-1 text-sm text-richblack-300">
@@ -68,7 +68,7 @@ export default function CreateCategory() {
 
         {/* ── Create Form ── */}
         <div className="lg:col-span-2">
-          <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+          <div className="rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-50/10">
                 <VscAdd className="text-lg text-yellow-50" />
@@ -140,7 +140,7 @@ export default function CreateCategory() {
 
         {/* ── Existing Categories ── */}
         <div className="lg:col-span-3">
-          <div className="rounded-xl border border-richblack-700 bg-richblack-800 p-6">
+          <div className="rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp" style={{animationDelay: '0.1s'}}>
             <h2 className="mb-6 text-lg font-semibold text-richblack-5">
               Existing Categories
             </h2>
@@ -162,7 +162,7 @@ export default function CreateCategory() {
                 {categories.map((cat, index) => (
                   <div
                     key={cat._id}
-                    className="flex items-start gap-4 rounded-lg border border-richblack-700 bg-richblack-900 p-4 transition-all duration-200 hover:border-richblack-600"
+                    className="flex items-start gap-4 rounded-2xl border border-white/5 bg-[#050505]/50 p-5 transition-all duration-300 hover:bg-white/5 hover:border-white/20"
                   >
                     {/* Index badge */}
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-yellow-50/10 text-xs font-bold text-yellow-50">

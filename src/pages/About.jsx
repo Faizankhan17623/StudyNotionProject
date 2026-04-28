@@ -15,11 +15,15 @@ import HighlightText from "../components/core/HomePage/HighlightText"
 const About = () => {
   return (
     <div>
-      <section className="bg-richblack-700">
-        <div className="relative mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-center text-white">
-          <header className="mx-auto py-20 text-4xl font-semibold lg:w-[70%]">
-            Driving Innovation in Online Education for a
-            <HighlightText text={"Brighter Future"} />
+      <section className="relative overflow-hidden py-32">
+        {/* Ambient Glows */}
+        <div className="ambient-orb ambient-orb-1 top-0 left-[10%] w-[500px] h-[500px]"></div>
+        <div className="ambient-orb ambient-orb-2 top-[20%] right-[10%] w-[600px] h-[600px]" style={{animationDelay: '-3s'}}></div>
+
+        <div className="relative mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-center text-white z-10">
+          <header className="mx-auto py-10 text-5xl md:text-7xl font-bold font-outfit lg:w-[80%] animate-revealDown leading-tight">
+            Driving Innovation in Online Education for a <br/>
+            <span className="text-gradient-yellow">Brighter Future</span>
             <p className="mx-auto mt-3 text-center text-base font-medium text-richblack-300 lg:w-[95%]">
               Studynotion is at the forefront of driving innovation in online
               education. We're passionate about creating a brighter future by
@@ -27,11 +31,11 @@ const About = () => {
               and nurturing a vibrant learning community.
             </p>
           </header>
-          <div className="sm:h-[70px] lg:h-[150px]"></div>
-          <div className="absolute bottom-0 left-[50%] grid w-[100%] translate-x-[-50%] translate-y-[30%] grid-cols-3 gap-3 lg:gap-5">
-            <img src={BannerImage1} alt="" />
-            <img src={BannerImage2} alt="" />
-            <img src={BannerImage3} alt="" />
+          <div className="sm:h-[70px] lg:h-[200px]"></div>
+          <div className="absolute bottom-0 left-[50%] grid w-[100%] translate-x-[-50%] translate-y-[30%] grid-cols-3 gap-5 lg:gap-8 z-20">
+            <img src={BannerImage1} alt="" className="rounded-2xl shadow-[0_20px_50px_rgba(31,162,255,0.4)] transition-transform duration-500 hover:scale-105 hover:-translate-y-2" />
+            <img src={BannerImage2} alt="" className="rounded-2xl shadow-[0_20px_50px_rgba(255,214,10,0.4)] transition-transform duration-500 hover:scale-105 hover:-translate-y-2" />
+            <img src={BannerImage3} alt="" className="rounded-2xl shadow-[0_20px_50px_rgba(166,255,203,0.4)] transition-transform duration-500 hover:scale-105 hover:-translate-y-2" />
           </div>
         </div>
       </section>
@@ -45,9 +49,10 @@ const About = () => {
 
       <section>
         <div className="mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-richblack-500">
-          <div className="flex flex-col items-center gap-10 lg:flex-row justify-between">
-            <div className="my-24 flex lg:w-[50%] flex-col gap-10">
-              <h1 className="bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCB045] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%] ">
+          <div className="flex flex-col items-center gap-10 lg:flex-row justify-between relative">
+            <div className="ambient-orb ambient-orb-1 top-1/2 left-0 w-[400px] h-[400px]"></div>
+            <div className="my-24 flex lg:w-[50%] flex-col gap-10 z-10 glass-card p-10 rounded-3xl">
+              <h1 className="bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCB045] bg-clip-text text-5xl font-bold font-outfit text-transparent lg:w-[70%]">
                 Our Founding Story
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
@@ -68,17 +73,18 @@ const About = () => {
               </p>
             </div>
 
-            <div>
+            <div className="relative z-10 animate-revealUp">
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#FC6767] to-[#833AB4] blur-[60px] opacity-40 z-[-1]"></div>
               <img
                 src={FoundingStory}
                 alt=""
-                className="shadow-[0_0_20px_0] shadow-[#FC6767]"
+                className="rounded-2xl shadow-[0_20px_50px_rgba(252,103,103,0.5)] border border-white/10"
               />
             </div>
           </div>
           <div className="flex flex-col items-center lg:gap-10 lg:flex-row justify-between">
-            <div className="my-24 flex lg:w-[40%] flex-col gap-10">
-              <h1 className="bg-gradient-to-b from-[#FF512F] to-[#F09819] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%] ">
+            <div className="my-24 flex lg:w-[40%] flex-col gap-10 glass-card p-8 rounded-3xl z-10">
+              <h1 className="bg-gradient-to-b from-[#FF512F] to-[#F09819] bg-clip-text text-4xl font-bold font-outfit text-transparent lg:w-[70%]">
                 Our Vision
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
@@ -90,8 +96,8 @@ const About = () => {
                 dynamic and interactive learning experience.
               </p>
             </div>
-            <div className="my-24 flex lg:w-[40%] flex-col gap-10">
-              <h1 className="bg-gradient-to-b from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] text-transparent bg-clip-text text-4xl font-semibold lg:w-[70%] ">
+            <div className="my-24 flex lg:w-[40%] flex-col gap-10 glass-card p-8 rounded-3xl z-10">
+              <h1 className="text-gradient text-4xl font-bold font-outfit lg:w-[70%]">
               Our Mission
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">

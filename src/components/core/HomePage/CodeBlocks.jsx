@@ -41,37 +41,44 @@ const CodeBlocks = ({
       </div>
 
       {/* Section 2 */}
-      <div className="h-fit code-border flex flex-row py-3 text-[10px] sm:text-sm leading-[18px] sm:leading-6 relative w-[100%] lg:w-[470px]">
-        {backgroundGradient}
-        {/* Indexing */}
-        <div className="text-center flex flex-col   w-[10%] select-none text-richblack-400 font-inter font-bold ">
-          <p>1</p>
-          <p>2</p>
-          <p>3</p>
-          <p>4</p>
-          <p>5</p>
-          <p>6</p>
-          <p>7</p>
-          <p>8</p>
-          <p>9</p>
-          <p>10</p>
-          <p>11</p>
+      <div className="h-fit mac-window flex flex-col text-[10px] sm:text-sm leading-[18px] sm:leading-6 relative w-[100%] lg:w-[470px] animate-revealUp shadow-2xl">
+        <div className="mac-header">
+          <div className="mac-dot close"></div>
+          <div className="mac-dot min"></div>
+          <div className="mac-dot max"></div>
         </div>
+        <div className="flex flex-row py-4 px-2 relative z-10">
+          {backgroundGradient}
+          {/* Indexing */}
+          <div className="text-center flex flex-col w-[10%] select-none text-richblack-500 font-inter font-bold">
+            <p>1</p>
+            <p>2</p>
+            <p>3</p>
+            <p>4</p>
+            <p>5</p>
+            <p>6</p>
+            <p>7</p>
+            <p>8</p>
+            <p>9</p>
+            <p>10</p>
+            <p>11</p>
+          </div>
 
-        {/* Codes */}
-        <div
-          className={`w-[90%] flex flex-col gap-2 font-bold font-mono ${codeColor} pr-1`}
-        >
-          <TypeAnimation
-            sequence={[codeblock, 1000, ""]}
-            cursor={true}
-            repeat={Infinity}
-            style={{
-              whiteSpace: "pre-line",
-              display: "block",
-            }}
-            omitDeletionAnimation={true}
-          />
+          {/* Codes */}
+          <div
+            className={`w-[90%] flex flex-col gap-2 font-bold font-mono ${codeColor} pr-1`}
+          >
+            <TypeAnimation
+              sequence={[codeblock, 1000, ""]}
+              cursor={true}
+              repeat={Infinity}
+              style={{
+                whiteSpace: "pre-line",
+                display: "block",
+              }}
+              omitDeletionAnimation={true}
+            />
+          </div>
         </div>
       </div>
     </div>

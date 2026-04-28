@@ -4,6 +4,7 @@ const Coupon = require("../models/Coupon")
 const crypto = require("crypto")
 const User = require("../models/User")
 const mailSender = require("../utils/mailSender")
+const { createNotification } = require("./Notification")
 const mongoose = require("mongoose")
 const {
   courseEnrollmentEmail,
@@ -229,6 +230,9 @@ const enrollStudents = async (courses, userId) => {
   const session = await mongoose.startSession()
   session.startTransaction()
 
+  // Collect data needed for notifications — fired after the transaction commits
+  const notificationQueue = []
+
   try {
     for (const courseId of courses) {
       // Find the course and enroll the student in it
@@ -276,10 +280,27 @@ const enrollStudents = async (courses, userId) => {
           process.env.FRONTEND_URL
         )
       )
+
+      notificationQueue.push({
+        instructorId: enrolledCourse.instructor,
+        studentName: `${enrolledStudent.firstName} ${enrolledStudent.lastName}`,
+        courseName: enrolledCourse.courseName,
+      })
     }
 
     await session.commitTransaction()
     session.endSession()
+
+    // Notify each instructor after the transaction is safely committed
+    for (const { instructorId, studentName, courseName } of notificationQueue) {
+      createNotification(
+        instructorId,
+        "enrollment",
+        "New Student Enrolled",
+        `${studentName} just enrolled in your course "${courseName}"`,
+        "/dashboard/instructor"
+      )
+    }
   } catch (error) {
     await session.abortTransaction()
     session.endSession()

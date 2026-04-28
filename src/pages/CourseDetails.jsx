@@ -133,12 +133,15 @@ function CourseDetails() {
 
   return (
     <>
-      <div className={`relative w-full bg-richblack-800`}>
+      <div className={`relative w-full bg-[#050505] overflow-hidden`}>
+        {/* Ambient Hero Glow */}
+        <div className="ambient-orb ambient-orb-1 top-0 left-0 w-[1000px] h-[1000px]"></div>
+
         {/* Hero Section */}
-        <div className="mx-auto box-content px-4 lg:w-[1260px] 2xl:relative ">
+        <div className="relative z-10 mx-auto box-content px-4 lg:w-[1260px] 2xl:relative pt-20 pb-12">
           <div className="mx-auto grid min-h-[450px] max-w-maxContentTab justify-items-center py-8 lg:mx-0 lg:justify-items-start lg:py-0 xl:max-w-[810px]">
-            <div className="relative block max-h-[30rem] lg:hidden">
-              <div className="absolute bottom-0 left-0 h-full w-full shadow-[#161D29_0px_-64px_36px_-28px_inset]"></div>
+            <div className="relative block max-h-[30rem] lg:hidden animate-revealDown">
+              <div className="absolute bottom-0 left-0 h-full w-full shadow-[#050505_0px_-64px_36px_-28px_inset]"></div>
               <img
                 src={thumbnail}
                 alt="course thumbnail"
@@ -146,10 +149,10 @@ function CourseDetails() {
               />
             </div>
             <div
-              className={`z-30 my-5 flex flex-col justify-center gap-4 py-5 text-lg text-richblack-5`}
+              className={`z-30 my-5 flex flex-col justify-center gap-4 py-5 text-lg text-richblack-5 animate-revealUp`}
             >
               <div>
-                <p className="text-4xl font-bold text-richblack-5 sm:text-[42px]">
+                <p className="text-5xl md:text-6xl font-bold font-outfit text-white leading-tight">
                   {courseName}
                 </p>
               </div>
@@ -193,29 +196,31 @@ function CourseDetails() {
             </div>
           </div>
           {/* Courses Card */}
-          <div className="right-[1rem] top-[60px] mx-auto hidden min-h-[600px] w-1/3 max-w-[410px] translate-y-24 md:translate-y-0 lg:absolute  lg:block">
-            <CourseDetailsCard
-              course={response?.data?.courseDetails}
-              setConfirmationModal={setConfirmationModal}
-              handleBuyCourse={handleBuyCourse}
-            />
+          <div className="right-[1rem] top-[60px] mx-auto hidden min-h-[600px] w-1/3 max-w-[410px] translate-y-24 md:translate-y-0 lg:absolute lg:block z-30">
+            <div className="glass-card shadow-[0_30px_60px_-15px_rgba(31,162,255,0.3)] rounded-2xl overflow-hidden border border-white/10 transition-transform duration-500 hover:-translate-y-2">
+              <CourseDetailsCard
+                course={response?.data?.courseDetails}
+                setConfirmationModal={setConfirmationModal}
+                handleBuyCourse={handleBuyCourse}
+              />
+            </div>
           </div>
         </div>
       </div>
-      <div className="mx-auto box-content px-4 text-start text-richblack-5 lg:w-[1260px]">
+      <div className="mx-auto box-content px-4 text-start text-richblack-5 lg:w-[1260px] mt-10">
         <div className="mx-auto max-w-maxContentTab lg:mx-0 xl:max-w-[810px]">
           {/* What will you learn section */}
-          <div className="my-8 border border-richblack-600 p-8">
-            <p className="text-3xl font-semibold">What you'll learn</p>
-            <div className="mt-5">
+          <div className="my-8 glass-card border border-white/10 p-8 rounded-2xl shadow-xl">
+            <p className="text-4xl font-bold font-outfit text-white">What you'll learn</p>
+            <div className="mt-5 text-richblack-200">
               <ReactMarkdown>{whatYouWillLearn}</ReactMarkdown>
             </div>
           </div>
 
           {/* Course Content Section */}
-          <div className="max-w-[830px] ">
+          <div className="max-w-[830px] my-10">
             <div className="flex flex-col gap-3">
-              <p className="text-[28px] font-semibold">Course Content</p>
+              <p className="text-4xl font-bold font-outfit text-white">Course Content</p>
               <div className="flex flex-wrap justify-between gap-2">
                 <div className="flex gap-2">
                   <span>

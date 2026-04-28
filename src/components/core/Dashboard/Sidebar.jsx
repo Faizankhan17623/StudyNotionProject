@@ -28,7 +28,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-3.5rem)] min-w-[240px] flex-col border-r-[1px] border-r-richblack-700 bg-richblack-800">
+      <div className="flex h-[calc(100vh-3.5rem)] min-w-[240px] flex-col border-r-[1px] border-r-richblack-700/50 bg-richblack-800/80 backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.4)] z-10 transition-all duration-300">
         {/* User Info */}
         <div className="flex items-center gap-3 border-b border-richblack-700 px-6 py-5">
           <img

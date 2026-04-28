@@ -6,6 +6,7 @@ import courseReducer from "../slices/courseSlice"
 import profileReducer from "../slices/profileSlice"
 import viewCourseReducer from "../slices/viewCourseSlice"
 import wishlistReducer from "../slices/wishlistSlice"
+import notificationReducer from "../slices/notificationSlice"
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   viewCourse: viewCourseReducer,
   wishlist: wishlistReducer,
+  notification: notificationReducer,
 })
 
 export default rootReducer

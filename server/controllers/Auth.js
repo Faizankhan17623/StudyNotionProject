@@ -75,9 +75,8 @@ exports.signup = async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create the user
-    let approved = ""
-    approved === "Instructor" ? (approved = false) : (approved = true)
+    // Instructors require admin approval before they can create courses
+    const approved = accountType !== "Instructor"
 
     // Create the Additional Profile For User
     const profileDetails = await Profile.create({
@@ -228,10 +227,14 @@ exports.sendotp = async (req, res) => {
     // console.log("Result is Generate OTP Func")
     // console.log("OTP", otp)
     // console.log("Result", result)
+    // let result = await OTP.findOne({ otp: otp })
     while (result) {
       otp = otpGenerator.generate(6, {
         upperCaseAlphabets: false,
+        lowerCaseAlphabets: false,
+        specialChars: false,
       })
+      result = await OTP.findOne({ otp: otp })
     }
     const otpPayload = { email, otp }
     const otpBody = await OTP.create(otpPayload)

@@ -48,19 +48,19 @@ export default function CoursesTable({ courses, setCourses, currentPage, setCurr
 
   return (
     <>
-      <Table className="rounded-xl border border-richblack-800 ">
+      <Table className="rounded-2xl border border-white/10 glass-card w-full shadow-2xl">
         <Thead>
-          <Tr className="flex gap-x-10 rounded-t-md border-b border-b-richblack-800 px-6 py-2">
-            <Th className="flex-1 text-left text-sm font-medium uppercase text-richblack-100">
+          <Tr className="flex gap-x-10 rounded-t-2xl border-b border-white/5 bg-[#050505]/50 px-6 py-4">
+            <Th className="flex-1 text-left text-sm font-medium uppercase text-richblack-300">
               Courses
             </Th>
-            <Th className="text-left text-sm font-medium uppercase text-richblack-100">
+            <Th className="text-left text-sm font-medium uppercase text-richblack-300">
               Duration
             </Th>
-            <Th className="text-left text-sm font-medium uppercase text-richblack-100">
+            <Th className="text-left text-sm font-medium uppercase text-richblack-300">
               Price
             </Th>
-            <Th className="text-left text-sm font-medium uppercase text-richblack-100">
+            <Th className="text-left text-sm font-medium uppercase text-richblack-300">
               Actions
             </Th>
           </Tr>
@@ -68,16 +68,15 @@ export default function CoursesTable({ courses, setCourses, currentPage, setCurr
         <Tbody>
           {courses?.length === 0 ? (
             <Tr>
-              <Td className="py-10 text-center text-2xl font-medium text-richblack-100">
+              <Td className="py-10 text-center text-2xl font-bold font-outfit text-white">
                 No courses found
-                {/* TODO: Need to change this state */}
               </Td>
             </Tr>
           ) : (
             courses?.map((course) => (
               <Tr
                 key={course._id}
-                className="flex gap-x-10 border-b border-richblack-800 px-6 py-8"
+                className="flex gap-x-10 border-b border-white/5 px-6 py-8 hover:bg-white/5 transition-colors duration-300"
               >
                 <Td className="flex flex-1 gap-x-4">
                   <img

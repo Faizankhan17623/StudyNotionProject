@@ -1,5 +1,6 @@
 const Question = require("../models/Question")
 const Course = require("../models/Course")
+const { createNotification } = require("./Notification")
 
 // Helper — check if user is enrolled student or course instructor
 const canAccessCourse = async (userId, courseId) => {
@@ -108,6 +109,17 @@ exports.answerQuestion = async (req, res) => {
     await question.save()
     await question.populate("author", "firstName lastName image")
     await question.populate("answers.author", "firstName lastName image")
+
+    // Notify the question author — but only if someone else answered
+    if (question.author._id.toString() !== userId.toString()) {
+      createNotification(
+        question.author._id,
+        "qa_answer",
+        "Your question received an answer",
+        `Someone answered your question: "${question.title}"`,
+        `/dashboard/enrolled-courses`
+      )
+    }
 
     return res.status(200).json({ success: true, data: question })
   } catch (error) {
