@@ -1,6 +1,6 @@
 import axios from "axios"
 
-export const axiosInstance = axios.create({ timeout: 30000 })
+export const axiosInstance = axios.create({ timeout: 120000 })
 
 // Response interceptor — normalize error messages so every catch block can
 // safely do `toast.error(error.message)` and get the real backend message.
@@ -22,12 +22,13 @@ axiosInstance.interceptors.response.use(
   }
 )
 
-export const apiConnector = (method, url, bodyData, headers, params) => {
+export const apiConnector = (method, url, bodyData, headers, params, timeout) => {
   return axiosInstance({
     method: `${method}`,
     url: `${url}`,
     data: bodyData ? bodyData : null,
     headers: headers ? headers : null,
     params: params ? params : null,
+    ...(timeout ? { timeout } : {}),
   })
 }
