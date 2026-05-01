@@ -69,6 +69,8 @@ app.use(
 	fileUpload({
 		useTempFiles: true,
 		tempFileDir: os.tmpdir(),
+		limits: { fileSize: 500 * 1024 * 1024 }, // 500 MB max
+		abortOnLimit: true,
 	})
 );
 
@@ -109,8 +111,10 @@ app.get("/api-docs.json", (req, res) => {
 });
 
 // Listening to the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
 	console.log(`App is listening at ${PORT}`);
 });
+// Allow up to 10 minutes for large video uploads
+server.timeout = 600000;
 
 // End of code.
