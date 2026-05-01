@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import { useSelector } from "react-redux"
 import { FiX, FiTag, FiTrash2, FiCopy } from "react-icons/fi"
 import { VscLoading } from "react-icons/vsc"
@@ -80,7 +81,7 @@ export default function CouponModal({ courseId, courseName, onClose }) {
     toast.success("Code copied!")
   }
 
-  return (
+  return createPortal(
     // Backdrop
     <div
       className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4"
@@ -257,6 +258,7 @@ export default function CouponModal({ courseId, courseName, onClose }) {
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
