@@ -289,7 +289,12 @@ const VideoDetails = () => {
                 {!isLastVideo() && (
                   <button
                     disabled={loading}
-                    onClick={goToNextVideo}
+                    onClick={async () => {
+                      if (!completedLectures.includes(subSectionId)) {
+                        await handleLectureCompletion()
+                      }
+                      goToNextVideo()
+                    }}
                     className="blackButton"
                   >
                     Next
