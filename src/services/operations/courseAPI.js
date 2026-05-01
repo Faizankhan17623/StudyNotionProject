@@ -242,11 +242,11 @@ export const deleteSection = async (data, token) => {
 
 export const createSubSection = async (data, token) => {
   let result = null
-  const toastId = toast.loading("Loading...")
+  const toastId = toast.loading("Uploading lecture video...")
   try {
     const response = await apiConnector("POST", CREATE_SUBSECTION_API, data, {
       Authorization: `Bearer ${token}`,
-    })
+    }, null, 300000)
     if (!response?.data?.success) {
       throw new Error("Could Not Add Lecture")
     }
@@ -261,11 +261,11 @@ export const createSubSection = async (data, token) => {
 
 export const updateSubSection = async (data, token) => {
   let result = null
-  const toastId = toast.loading("Loading...")
+  const toastId = toast.loading("Saving lecture...")
   try {
     const response = await apiConnector("POST", UPDATE_SUBSECTION_API, data, {
       Authorization: `Bearer ${token}`,
-    })
+    }, null, 300000)
     if (!response?.data?.success) {
       throw new Error("Could Not Update Lecture")
     }
