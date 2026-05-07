@@ -22,6 +22,7 @@ const cors = require("cors");
 const { cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
 const os = require("os");
+const status = require('express-status-monitor')
 const userAgent = require('express-useragent')
 var morgan = require('morgan')
 
@@ -56,6 +57,8 @@ app.use(
 		credentials: true,
 	})
 );
+
+app.use(status())
 
 // Middlewares
 app.use(express.json());
