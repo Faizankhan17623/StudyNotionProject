@@ -321,6 +321,9 @@ FRONTEND_URL=http://localhost:5173
 # Auth
 JWT_SECRET=your_super_secret_jwt_key
 
+# ipinfo.io token — used for IP geolocation on login-alert emails
+TOKEN_NAME=your_ipinfo_io_token
+
 # Email (SMTP)
 MAIL_HOST=smtp.gmail.com
 MAIL_USER=your_email@gmail.com
