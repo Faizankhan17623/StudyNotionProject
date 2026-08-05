@@ -2,9 +2,11 @@ import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import { HiOutlineAcademicCap, HiOutlineUsers, HiOutlineCurrencyRupee, HiOutlinePlusCircle } from "react-icons/hi"
+import { RiVipCrownFill } from "react-icons/ri"
 
 import { fetchInstructorCourses } from "../../../services/operations/courseAPI"
 import { getInstructorData } from "../../../services/operations/profileAPI"
+import { PLAN, PLAN_LABEL } from "../../../utils/planUtils"
 import InstructorChart from "./InstructorDashboard/InstructorChart"
 
 export default function Instructor() {
@@ -65,9 +67,24 @@ export default function Instructor() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-richblack-5">
-            Welcome back, {user?.firstName} 👋
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-richblack-5">
+              Welcome back, {user?.firstName} 👋
+            </h1>
+            <Link
+              to="/pricing"
+              className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold transition-transform hover:scale-105 ${
+                (user?.subscriptionPlan || PLAN.FREE) === PLAN.PRO_MAX
+                  ? "bg-yellow-50 text-richblack-900"
+                  : (user?.subscriptionPlan || PLAN.FREE) === PLAN.PRO
+                  ? "bg-blue-500/20 text-blue-100 border border-blue-500/40"
+                  : "bg-richblack-800 text-richblack-400 border border-richblack-700"
+              }`}
+            >
+              <RiVipCrownFill className="text-xs" />
+              {PLAN_LABEL[user?.subscriptionPlan || PLAN.FREE]}
+            </Link>
+          </div>
           <p className="mt-1 text-sm text-richblack-300">
             Here's what's happening with your courses
           </p>

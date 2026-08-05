@@ -93,30 +93,27 @@ exports.deleteAccount = async (req, res) => {
   }
 }
 
-// FEATURE: Subscription plan upgrade/downgrade (Free / Pro / ProMax)
+// Downgrade to Free — no payment required. Upgrading to Pro/ProMax must go
+// through /payment/createPlanOrder + /payment/verifyPlanPayment instead, so
+// a paid tier can never be granted without a verified Razorpay payment.
 exports.updateSubscriptionPlan = async (req, res) => {
   try {
     const { plan } = req.body
     const id = req.user.id
 
-    const allowedPlans = ["Free", "Pro", "ProMax"]
-    if (!allowedPlans.includes(plan)) {
+    if (plan !== "Free") {
       return res.status(400).json({
         success: false,
-        message: "Invalid plan. Must be one of Free, Pro, ProMax",
+        message: "Upgrading requires payment. Use the plan checkout instead.",
       })
     }
-
-    const now = new Date()
-    const oneMonthFromNow = new Date(now)
-    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1)
 
     const updatedUser = await User.findByIdAndUpdate(
       id,
       {
-        subscriptionPlan: plan,
-        planStartedAt: plan === "Free" ? null : now,
-        planExpiresAt: plan === "Free" ? null : oneMonthFromNow,
+        subscriptionPlan: "Free",
+        planStartedAt: null,
+        planExpiresAt: null,
       },
       { new: true }
     )
@@ -125,7 +122,7 @@ exports.updateSubscriptionPlan = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `Plan updated to ${plan}`,
+      message: "Plan updated to Free",
       data: updatedUser,
     })
   } catch (error) {

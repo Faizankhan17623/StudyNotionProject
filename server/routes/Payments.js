@@ -7,6 +7,8 @@ const {
   // verifySignature,
   verifyPayment,
   sendPaymentSuccessEmail,
+  createPlanOrder,
+  verifyPlanPayment,
 } = require("../controllers/payments")
 const { auth, isInstructor, isStudent, isAdmin } = require("../middleware/auth")
 router.post("/capturePayment", auth, isStudent, capturePayment)
@@ -19,5 +21,9 @@ router.post(
   sendPaymentSuccessEmail
 )
 // router.post("/verifySignature", verifySignature)
+
+// Subscription plan checkout (Pro / Pro Max) — any logged-in account type
+router.post("/createPlanOrder", auth, createPlanOrder)
+router.post("/verifyPlanPayment", auth, verifyPlanPayment)
 
 module.exports = router

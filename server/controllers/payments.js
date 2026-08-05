@@ -12,6 +12,13 @@ const {
 const { paymentSuccessEmail } = require("../mail/templates/paymentSuccessEmail")
 const CourseProgress = require("../models/CourseProgress")
 const Enrollment = require("../models/Enrollment")
+const PlanPurchase = require("../models/PlanPurchase")
+
+// Server-side source of truth for plan prices — never trust a client-sent amount
+const PLAN_PRICES = {
+  Pro: 499,
+  ProMax: 999,
+}
 
 // Enroll student in free (price = 0) courses without any payment
 exports.enrollFree = async (req, res) => {
@@ -218,6 +225,104 @@ exports.sendPaymentSuccessEmail = async (req, res) => {
     return res
       .status(400)
       .json({ success: false, message: "Could not send email" })
+  }
+}
+
+// Create a Razorpay order to upgrade the caller's subscription plan
+exports.createPlanOrder = async (req, res) => {
+  const { plan } = req.body
+  const userId = req.user.id
+
+  if (!PLAN_PRICES[plan]) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid plan. Must be Pro or ProMax",
+    })
+  }
+
+  const amount = PLAN_PRICES[plan]
+
+  const options = {
+    amount: amount * 100,
+    currency: "INR",
+    receipt: `plan_receipt_${Date.now()}`,
+  }
+
+  try {
+    const paymentResponse = await instance.orders.create(options)
+    res.json({
+      success: true,
+      data: paymentResponse,
+      plan,
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ success: false, message: "Could not initiate plan order." })
+  }
+}
+
+// Verify the Razorpay signature, then upgrade the plan and record the purchase
+exports.verifyPlanPayment = async (req, res) => {
+  const razorpay_order_id   = req.body?.razorpay_order_id
+  const razorpay_payment_id = req.body?.razorpay_payment_id
+  const razorpay_signature  = req.body?.razorpay_signature
+  const plan                = req.body?.plan
+
+  const userId = req.user.id
+
+  if (
+    !razorpay_order_id ||
+    !razorpay_payment_id ||
+    !razorpay_signature ||
+    !PLAN_PRICES[plan] ||
+    !userId
+  ) {
+    return res.status(400).json({ success: false, message: "Payment details are incomplete. Please try again." })
+  }
+
+  const body = razorpay_order_id + "|" + razorpay_payment_id
+
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_SECRET)
+    .update(body.toString())
+    .digest("hex")
+
+  if (expectedSignature !== razorpay_signature) {
+    return res.status(400).json({ success: false, message: "Payment verification failed. Signature mismatch." })
+  }
+
+  try {
+    const now = new Date()
+    const oneMonthFromNow = new Date(now)
+    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1)
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        subscriptionPlan: plan,
+        planStartedAt: now,
+        planExpiresAt: oneMonthFromNow,
+      },
+      { new: true }
+    )
+      .populate("additionalDetails")
+      .exec()
+
+    await PlanPurchase.create({
+      user: userId,
+      plan,
+      amount: PLAN_PRICES[plan],
+      razorpay_order_id,
+      razorpay_payment_id,
+    })
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment Verified",
+      data: updatedUser,
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message })
   }
 }
 

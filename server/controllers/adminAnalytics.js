@@ -1,6 +1,7 @@
 const User = require("../models/User")
 const Course = require("../models/Course")
 const Enrollment = require("../models/Enrollment")
+const PlanPurchase = require("../models/PlanPurchase")
 
 // Month name lookup
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
@@ -87,6 +88,26 @@ exports.getAdminAnalytics = async (req, res) => {
       },
     ])
 
+    // ── 4b. Subscription plan distribution + revenue ─────────────────────────
+    const [planDistributionRaw, subscriptionRevenueResult, totalSubscriptions] =
+      await Promise.all([
+        User.aggregate([
+          { $group: { _id: "$subscriptionPlan", count: { $sum: 1 } } },
+        ]),
+        PlanPurchase.aggregate([
+          { $group: { _id: null, total: { $sum: "$amount" } } },
+        ]),
+        PlanPurchase.countDocuments({}),
+      ])
+
+    const planDistribution = { Free: 0, Pro: 0, ProMax: 0 }
+    planDistributionRaw.forEach((row) => {
+      const key = row._id || "Free"
+      if (key in planDistribution) planDistribution[key] = row.count
+    })
+
+    const subscriptionRevenue = subscriptionRevenueResult[0]?.total || 0
+
     // ── 4. Top 5 courses by enrollments ─────────────────────────────────────
     const topCoursesByEnrollment = await Enrollment.aggregate([
       { $group: { _id: "$course", revenue: { $sum: "$amount" }, enrollments: { $sum: 1 } } },
@@ -126,6 +147,9 @@ exports.getAdminAnalytics = async (req, res) => {
         monthlyData,
         topCoursesByRevenue,
         topCoursesByEnrollment,
+        planDistribution,
+        subscriptionRevenue,
+        totalSubscriptions,
       },
     })
   } catch (error) {

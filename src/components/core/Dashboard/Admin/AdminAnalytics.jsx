@@ -10,6 +10,7 @@ import {
   HiOutlineEye,
   HiOutlineGlobe,
 } from "react-icons/hi"
+import { RiVipCrownFill } from "react-icons/ri"
 
 import { apiConnector } from "../../../../services/apiConnector"
 import { adminEndpoints, analyticsEndpoints } from "../../../../services/apis"
@@ -119,7 +120,15 @@ export default function AdminAnalytics() {
     )
   }
 
-  const { overview, monthlyData, topCoursesByRevenue, topCoursesByEnrollment } = data
+  const {
+    overview,
+    monthlyData,
+    topCoursesByRevenue,
+    topCoursesByEnrollment,
+    planDistribution,
+    subscriptionRevenue,
+    totalSubscriptions,
+  } = data
 
   // ── Bar chart datasets ─────────────────────────────────────────────────────
   const labels = monthlyData.map((m) => m.label)
@@ -164,6 +173,26 @@ export default function AdminAnalytics() {
     datasets: [{
       data: topCoursesByEnrollment.map((c) => c.enrollments),
       backgroundColor: BRAND_COLORS,
+      borderColor: "#161D29",
+      borderWidth: 2,
+    }],
+  }
+
+  // ── Plan distribution pie ────────────────────────────────────────────────
+  const PLAN_COLORS = {
+    Free: "rgba(175, 178, 191, 0.8)",
+    Pro: "rgba(17, 138, 178, 0.85)",
+    ProMax: "rgba(255, 214, 10, 0.85)",
+  }
+  const planDistributionData = {
+    labels: ["Free", "Pro", "Pro Max"],
+    datasets: [{
+      data: [
+        planDistribution?.Free || 0,
+        planDistribution?.Pro || 0,
+        planDistribution?.ProMax || 0,
+      ],
+      backgroundColor: [PLAN_COLORS.Free, PLAN_COLORS.Pro, PLAN_COLORS.ProMax],
       borderColor: "#161D29",
       borderWidth: 2,
     }],
@@ -372,6 +401,46 @@ export default function AdminAnalytics() {
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Subscription plans */}
+      <div className="rounded-3xl border border-white/10 glass-card p-8 shadow-xl animate-revealUp" style={{animationDelay: '0.4s'}}>
+        <div className="mb-6 flex items-center gap-2">
+          <RiVipCrownFill className="text-lg text-yellow-50" />
+          <h2 className="text-lg font-bold text-richblack-5">Subscription Plans</h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-8">
+          <StatCard
+            icon={<HiOutlineCurrencyRupee className="text-2xl text-yellow-50" />}
+            label="Subscription Revenue"
+            value={`₹${(subscriptionRevenue || 0).toLocaleString("en-IN")}`}
+            sub={`${totalSubscriptions || 0} upgrades`}
+            color="bg-yellow-900"
+          />
+          <StatCard
+            icon={<RiVipCrownFill className="text-2xl text-richblack-300" />}
+            label="Free Users"
+            value={(planDistribution?.Free || 0).toLocaleString()}
+            color="bg-richblack-700"
+          />
+          <StatCard
+            icon={<RiVipCrownFill className="text-2xl text-blue-200" />}
+            label="Pro Users"
+            value={(planDistribution?.Pro || 0).toLocaleString()}
+            color="bg-blue-900"
+          />
+          <StatCard
+            icon={<RiVipCrownFill className="text-2xl text-yellow-50" />}
+            label="Pro Max Users"
+            value={(planDistribution?.ProMax || 0).toLocaleString()}
+            color="bg-yellow-900"
+          />
+        </div>
+
+        <div className="h-56">
+          <Pie data={planDistributionData} options={pieOptions} />
         </div>
       </div>
     </div>

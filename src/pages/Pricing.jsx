@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast"
 import Footer from "../components/Common/Footer"
 import ConfirmationModal from "../components/Common/ConfirmationModal"
 import { updateSubscriptionPlan } from "../services/operations/profileAPI"
+import { BuyPlan } from "../services/operations/paymentsAPI"
 import { PLAN, PLAN_LABEL } from "../utils/planUtils"
 
 const plans = [
@@ -83,19 +84,36 @@ const Pricing = () => {
       return
     }
 
+    // Downgrading to Free needs no payment — switch instantly after confirming.
+    if (planId === PLAN.FREE) {
+      setConfirmationModal({
+        text1: "Switch to Free?",
+        text2: "You'll lose access to Pro features immediately.",
+        btn1Text: updating ? "Updating..." : "Confirm",
+        btn2Text: "Cancel",
+        btn1Handler: async () => {
+          setUpdating(true)
+          await dispatch(updateSubscriptionPlan(token, planId))
+          setUpdating(false)
+          setConfirmationModal(null)
+        },
+        btn2Handler: () => setConfirmationModal(null),
+      })
+      return
+    }
+
+    // Upgrading to a paid plan goes through real Razorpay checkout.
     setConfirmationModal({
-      text1: `Switch to ${PLAN_LABEL[planId]}?`,
-      text2:
-        planId === PLAN.FREE
-          ? "You'll lose access to Pro features immediately."
-          : `You'll get instant access to all ${PLAN_LABEL[planId]} features.`,
-      btn1Text: updating ? "Updating..." : "Confirm",
+      text1: `Upgrade to ${PLAN_LABEL[planId]}?`,
+      text2: `You'll be charged ₹${
+        plans.find((p) => p.id === planId).price
+      } via Razorpay. Access unlocks immediately after payment.`,
+      btn1Text: "Proceed to Payment",
       btn2Text: "Cancel",
-      btn1Handler: async () => {
-        setUpdating(true)
-        await dispatch(updateSubscriptionPlan(token, planId))
-        setUpdating(false)
+      btn1Handler: () => {
         setConfirmationModal(null)
+        setUpdating(true)
+        BuyPlan(token, planId, user, dispatch, () => setUpdating(false))
       },
       btn2Handler: () => setConfirmationModal(null),
     })
@@ -162,7 +180,7 @@ const Pricing = () => {
                       ? "bg-yellow-50 text-richblack-900 shadow-[0_0_15px_rgba(255,214,10,0.5)]"
                       : "bg-richblack-800 border border-richblack-600 text-richblack-5 hover:bg-richblack-700"
                   }`}
-                  disabled={currentPlan === plan.id}
+                  disabled={currentPlan === plan.id || updating}
                 >
                   {currentPlan === plan.id
                     ? "Current Plan"

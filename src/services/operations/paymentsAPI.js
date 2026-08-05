@@ -3,14 +3,18 @@ import { toast } from "react-hot-toast"
 import rzpLogo from "../../assets/Logo/rzp_logo.png"
 import { resetCart } from "../../slices/cartSlice"
 import { setPaymentLoading } from "../../slices/courseSlice"
+import { setUser } from "../../slices/profileSlice"
 import { apiConnector } from "../apiConnector"
 import { studentEndpoints } from "../apis"
+import { PLAN_LABEL } from "../../utils/planUtils"
 
 const {
   COURSE_PAYMENT_API,
   COURSE_VERIFY_API,
   SEND_PAYMENT_SUCCESS_EMAIL_API,
   ENROLL_FREE_API,
+  CREATE_PLAN_ORDER_API,
+  VERIFY_PLAN_PAYMENT_API,
 } = studentEndpoints
 
 // ********************************************************************************************************
@@ -135,6 +139,78 @@ async function verifyPayment(bodyData, token, navigate, dispatch) {
   }
   toast.dismiss(toastId)
   dispatch(setPaymentLoading(false))
+}
+
+// Upgrade to a paid subscription plan (Pro / Pro Max) via real Razorpay checkout
+export async function BuyPlan(token, plan, user_details, dispatch, onDone) {
+  const toastId = toast.loading("Loading...")
+  try {
+    const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js")
+
+    if (!res) {
+      toast.error(
+        "Razorpay SDK failed to load. Check your Internet Connection."
+      )
+      return
+    }
+
+    const orderResponse = await apiConnector(
+      "POST",
+      CREATE_PLAN_ORDER_API,
+      { plan },
+      { Authorization: `Bearer ${token}` }
+    )
+
+    if (!orderResponse.data.success) {
+      throw new Error(orderResponse.data.message)
+    }
+
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY,
+      currency: orderResponse.data.data.currency,
+      amount: `${orderResponse.data.data.amount}`,
+      order_id: orderResponse.data.data.id,
+      name: "StudyNotion",
+      description: `Upgrade to ${PLAN_LABEL[plan]}`,
+      image: rzpLogo,
+      prefill: {
+        name: `${user_details.firstName} ${user_details.lastName}`,
+        email: user_details.email,
+      },
+      handler: function (response) {
+        verifyPlanPayment({ ...response, plan }, token, dispatch, onDone)
+      },
+    }
+    const paymentObject = new window.Razorpay(options)
+    paymentObject.open()
+    paymentObject.on("payment.failed", function () {
+      toast.error("Oops! Payment Failed.")
+    })
+  } catch (error) {
+    toast.error(error.message || "Could not initiate payment. Please try again.")
+  }
+  toast.dismiss(toastId)
+}
+
+async function verifyPlanPayment(bodyData, token, dispatch, onDone) {
+  const toastId = toast.loading("Verifying Payment...")
+  try {
+    const response = await apiConnector("POST", VERIFY_PLAN_PAYMENT_API, bodyData, {
+      Authorization: `Bearer ${token}`,
+    })
+    if (!response.data.success) {
+      throw new Error(response.data.message)
+    }
+    const userImage = response.data.data.image
+      ? response.data.data.image
+      : `https://api.dicebear.com/5.x/initials/svg?seed=${response.data.data.firstName} ${response.data.data.lastName}`
+    dispatch(setUser({ ...response.data.data, image: userImage }))
+    toast.success(`Payment Successful. You're now on the ${PLAN_LABEL[bodyData.plan]} plan!`)
+  } catch (error) {
+    toast.error(error.message || "Payment verification failed. Please contact support.")
+  }
+  toast.dismiss(toastId)
+  if (onDone) onDone()
 }
 
 async function sendPaymentSuccessEmail(response, amount, token) {
