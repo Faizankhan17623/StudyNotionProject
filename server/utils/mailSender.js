@@ -13,6 +13,9 @@ const mailSender = async (email, title, body) => {
       tls: {
         rejectUnauthorized: false,
       },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
     })
 
     let info = await transporter.sendMail({
