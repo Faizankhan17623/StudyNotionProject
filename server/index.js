@@ -38,6 +38,7 @@ database.connect();
 const allowedOrigins = [
 	"http://localhost:3000",
 	"http://localhost:5173",
+	"http://13.60.233.66"
 	process.env.FRONTEND_URL,
 ].filter(Boolean);
 
