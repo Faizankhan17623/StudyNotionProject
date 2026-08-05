@@ -169,7 +169,23 @@ exports.verifyPayment = async (req, res) => {
     .digest("hex")
 
   if (expectedSignature === razorpay_signature) {
-    await enrollStudents(courses, userId)
+    try {
+      await enrollStudents(courses, userId)
+    } catch (error) {
+      // Payment is already verified/captured at this point — never leave the
+      // student having paid with no record of it. Log loudly so it can be
+      // manually reconciled, and tell the client honestly what happened.
+      console.error(
+        `Payment verified (order ${razorpay_order_id}) but enrollment failed for user ${userId}:`,
+        error
+      )
+      return res.status(500).json({
+        success: false,
+        message:
+          "Your payment was successful, but we couldn't complete enrollment automatically. Our team has been notified — please contact support with your payment ID: " +
+          razorpay_payment_id,
+      })
+    }
 
     // Mark the coupon as used by this student
     if (couponCode) {
@@ -335,8 +351,10 @@ const enrollStudents = async (courses, userId) => {
   const session = await mongoose.startSession()
   session.startTransaction()
 
-  // Collect data needed for notifications — fired after the transaction commits
-  const notificationQueue = []
+  // Collect data needed for notifications/emails — fired after the
+  // transaction commits, so a failed email or notification can never
+  // roll back an enrollment the student already paid for.
+  const postCommitQueue = []
 
   try {
     for (const courseId of courses) {
@@ -375,19 +393,9 @@ const enrollStudents = async (courses, userId) => {
         { new: true, session }
       )
 
-      // Send an email notification to the enrolled student
-      await mailSender(
-        enrolledStudent.email,
-        `Successfully Enrolled into ${enrolledCourse.courseName}`,
-        courseEnrollmentEmail(
-          enrolledCourse.courseName,
-          `${enrolledStudent.firstName} ${enrolledStudent.lastName}`,
-          process.env.FRONTEND_URL
-        )
-      )
-
-      notificationQueue.push({
+      postCommitQueue.push({
         instructorId: enrolledCourse.instructor,
+        studentEmail: enrolledStudent.email,
         studentName: `${enrolledStudent.firstName} ${enrolledStudent.lastName}`,
         courseName: enrolledCourse.courseName,
       })
@@ -395,20 +403,31 @@ const enrollStudents = async (courses, userId) => {
 
     await session.commitTransaction()
     session.endSession()
-
-    // Notify each instructor after the transaction is safely committed
-    for (const { instructorId, studentName, courseName } of notificationQueue) {
-      createNotification(
-        instructorId,
-        "enrollment",
-        "New Student Enrolled",
-        `${studentName} just enrolled in your course "${courseName}"`,
-        "/dashboard/instructor"
-      )
-    }
   } catch (error) {
     await session.abortTransaction()
     session.endSession()
     throw error
+  }
+
+  // Enrollment is committed and safe. Email/notification failures from here
+  // on are logged, not thrown — they must never undo a paid enrollment.
+  for (const { instructorId, studentEmail, studentName, courseName } of postCommitQueue) {
+    try {
+      await mailSender(
+        studentEmail,
+        `Successfully Enrolled into ${courseName}`,
+        courseEnrollmentEmail(courseName, studentName, process.env.FRONTEND_URL)
+      )
+    } catch (error) {
+      console.log("Enrollment succeeded but confirmation email failed:", error.message)
+    }
+
+    createNotification(
+      instructorId,
+      "enrollment",
+      "New Student Enrolled",
+      `${studentName} just enrolled in your course "${courseName}"`,
+      "/dashboard/instructor"
+    )
   }
 }
