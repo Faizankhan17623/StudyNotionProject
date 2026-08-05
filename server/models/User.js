@@ -81,6 +81,15 @@ const userSchema = new mongoose.Schema(
 
     // ── Visitor Tracking ─────────────────────────────────────────────────────
     lastSeen: { type: Date, default: null },
+
+    // ── Subscription Plan ────────────────────────────────────────────────────
+    subscriptionPlan: {
+      type: String,
+      enum: ["Free", "Pro", "ProMax"],
+      default: "Free",
+    },
+    planStartedAt: { type: Date, default: null },
+    planExpiresAt: { type: Date, default: null },
   },
   { timestamps: true }
 )

@@ -18,6 +18,7 @@ export const profileEndpoints = {
   GET_WISHLIST_API: BASE_URL + "/profile/getWishlist",
   GET_CERTIFICATE_API: BASE_URL + "/profile/getCertificate",
   GET_INSTRUCTOR_PROFILE_API: BASE_URL + "/profile/instructorProfile",
+  UPDATE_SUBSCRIPTION_PLAN_API: BASE_URL + "/profile/updateSubscriptionPlan",
 }
 
 // STUDENTS ENDPOINTS

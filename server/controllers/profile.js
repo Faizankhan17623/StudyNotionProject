@@ -93,6 +93,49 @@ exports.deleteAccount = async (req, res) => {
   }
 }
 
+// FEATURE: Subscription plan upgrade/downgrade (Free / Pro / ProMax)
+exports.updateSubscriptionPlan = async (req, res) => {
+  try {
+    const { plan } = req.body
+    const id = req.user.id
+
+    const allowedPlans = ["Free", "Pro", "ProMax"]
+    if (!allowedPlans.includes(plan)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid plan. Must be one of Free, Pro, ProMax",
+      })
+    }
+
+    const now = new Date()
+    const oneMonthFromNow = new Date(now)
+    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1)
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        subscriptionPlan: plan,
+        planStartedAt: plan === "Free" ? null : now,
+        planExpiresAt: plan === "Free" ? null : oneMonthFromNow,
+      },
+      { new: true }
+    )
+      .populate("additionalDetails")
+      .exec()
+
+    return res.status(200).json({
+      success: true,
+      message: `Plan updated to ${plan}`,
+      data: updatedUser,
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    })
+  }
+}
+
 exports.getAllUserDetails = async (req, res) => {
   try {
     const id = req.user.id

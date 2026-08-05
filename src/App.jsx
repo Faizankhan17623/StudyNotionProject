@@ -44,6 +44,8 @@ import VerifyEmail from "./pages/VerifyEmail"
 import ViewCourse from "./pages/ViewCourse"
 import Certificate from "./pages/Certificate"
 import InstructorProfile from "./pages/InstructorProfile"
+import Pricing from "./pages/Pricing"
+import HelpCenter from "./pages/HelpCenter"
 import { getUserDetails } from "./services/operations/profileAPI"
 import { logout } from "./services/operations/authAPI"
 import { apiConnector } from "./services/apiConnector"
@@ -126,6 +128,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/help-center" element={<HelpCenter />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="courses/:courseId" element={<CourseDetails />} />
         <Route path="catalog/:catalogName" element={<Catalog />} />

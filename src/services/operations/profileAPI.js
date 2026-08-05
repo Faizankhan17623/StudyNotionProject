@@ -13,6 +13,7 @@ const {
   ADD_TO_WISHLIST_API,
   REMOVE_FROM_WISHLIST_API,
   GET_WISHLIST_API,
+  UPDATE_SUBSCRIPTION_PLAN_API,
 } = profileEndpoints
 
 const {
@@ -232,4 +233,36 @@ export const getWishlist = async (token) => {
     toast.error(error.message)
   }
   return result
+}
+
+// ********************************************************************************************************
+//                                      Subscription Plan Operations
+// ********************************************************************************************************
+
+export function updateSubscriptionPlan(token, plan) {
+  return async (dispatch) => {
+    const toastId = toast.loading("Updating plan...")
+    try {
+      const response = await apiConnector(
+        "PUT",
+        UPDATE_SUBSCRIPTION_PLAN_API,
+        { plan },
+        { Authorization: `Bearer ${token}` }
+      )
+      if (!response.data.success) {
+        throw new Error(response.data.message)
+      }
+      const userImage = response.data.data.image
+        ? response.data.data.image
+        : `https://api.dicebear.com/5.x/initials/svg?seed=${response.data.data.firstName} ${response.data.data.lastName}`
+      dispatch(setUser({ ...response.data.data, image: userImage }))
+      toast.success(`You're now on the ${plan === "ProMax" ? "Pro Max" : plan} plan`)
+      return true
+    } catch (error) {
+      toast.error(error.message || "Could not update plan.")
+      return false
+    } finally {
+      toast.dismiss(toastId)
+    }
+  }
 }

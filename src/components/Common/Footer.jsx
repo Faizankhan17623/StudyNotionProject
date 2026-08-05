@@ -95,7 +95,13 @@ const Footer = () => {
                       key={index}
                       className="text-[14px] cursor-pointer hover:text-richblack-50 transition-all duration-200"
                     >
-                      <Link to={ele.split(" ").join("-").toLowerCase()}>
+                      <Link
+                        to={
+                          ele === "Paid memberships"
+                            ? "/pricing"
+                            : ele.split(" ").join("-").toLowerCase()
+                        }
+                      >
                         {ele}
                       </Link>
                     </div>

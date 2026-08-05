@@ -1,11 +1,13 @@
 import { useState } from "react"
 import { VscSignOut } from "react-icons/vsc"
+import { RiVipCrownFill } from "react-icons/ri"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { sidebarLinks } from "../../../data/dashboard-links"
 import { logout } from "../../../services/operations/authAPI"
 import { ACCOUNT_TYPE } from "../../../utils/constants"
+import { PLAN, PLAN_LABEL } from "../../../utils/planUtils"
 import ConfirmationModal from "../../Common/ConfirmationModal"
 import SidebarLink from "./SidebarLink"
 
@@ -43,6 +45,21 @@ export default function Sidebar() {
             <p className="truncate text-xs text-richblack-400 capitalize">
               {user?.accountType}
             </p>
+            {/* Plan badge */}
+            <Link to="/pricing" className="mt-1 inline-flex items-center gap-1 group">
+              <RiVipCrownFill
+                className={`text-xs ${
+                  (user?.subscriptionPlan || PLAN.FREE) === PLAN.PRO_MAX
+                    ? "text-yellow-50"
+                    : (user?.subscriptionPlan || PLAN.FREE) === PLAN.PRO
+                    ? "text-blue-200"
+                    : "text-richblack-500"
+                }`}
+              />
+              <span className="text-xs font-semibold text-richblack-300 group-hover:text-richblack-100 group-hover:underline">
+                {PLAN_LABEL[user?.subscriptionPlan || PLAN.FREE]} plan
+              </span>
+            </Link>
             {/* Streak badge — students only */}
             {user?.accountType === ACCOUNT_TYPE.STUDENT && (user?.currentStreak > 0) && (
               <div className="mt-1 flex items-center gap-1">

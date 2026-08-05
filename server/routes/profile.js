@@ -13,6 +13,7 @@ const {
   getWishlist,
   getCertificate,
   getInstructorProfile,
+  updateSubscriptionPlan,
 } = require("../controllers/profile")
 
 // ********************************************************************************************************
@@ -34,5 +35,7 @@ router.get("/getWishlist", auth, isStudent, getWishlist)
 router.get("/getCertificate/:courseId", auth, isStudent, getCertificate)
 // FEATURE-10: Instructor public profile (no auth required)
 router.get("/instructorProfile/:instructorId", getInstructorProfile)
+// Subscription plan (Free / Pro / ProMax)
+router.put("/updateSubscriptionPlan", auth, updateSubscriptionPlan)
 
 module.exports = router
