@@ -20,6 +20,21 @@ const PLAN_PRICES = {
   ProMax: 999,
 }
 
+// Free-plan students may only have 1 active enrolled course at a time,
+// per the Pricing page. Pro/ProMax are unlimited. Returns an error message
+// string if the enrollment should be blocked, or null if it's allowed.
+async function checkEnrollmentLimit(userId, newCourseCount) {
+  const user = await User.findById(userId).select("subscriptionPlan courses")
+  const plan = user?.subscriptionPlan || "Free"
+  if (plan !== "Free") return null
+
+  const currentCount = user?.courses?.length || 0
+  if (currentCount + newCourseCount > 1) {
+    return "Free plan is limited to 1 active course. Upgrade to Pro to enroll in unlimited courses."
+  }
+  return null
+}
+
 // Enroll student in free (price = 0) courses without any payment
 exports.enrollFree = async (req, res) => {
   const { courses } = req.body
@@ -48,6 +63,11 @@ exports.enrollFree = async (req, res) => {
       if (course.studentsEnroled.includes(uid)) {
         return res.status(400).json({ success: false, message: "Already enrolled in this course" })
       }
+    }
+
+    const limitError = await checkEnrollmentLimit(userId, courses.length)
+    if (limitError) {
+      return res.status(403).json({ success: false, message: limitError })
     }
 
     await enrollStudents(courses, userId)
@@ -112,6 +132,11 @@ exports.capturePayment = async (req, res) => {
       console.log("Coupon apply error during payment:", err)
       // Non-fatal — proceed without discount if coupon lookup fails
     }
+  }
+
+  const limitError = await checkEnrollmentLimit(userId, courses.length)
+  if (limitError) {
+    return res.status(403).json({ success: false, message: limitError })
   }
 
   // If total is 0 (all courses are free or fully discounted), skip Razorpay

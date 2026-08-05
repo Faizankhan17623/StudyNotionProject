@@ -3,11 +3,13 @@ import copy from "copy-to-clipboard"
 import { toast } from "react-hot-toast"
 import { BsFillCaretRightFill } from "react-icons/bs"
 import { FaShareSquare } from "react-icons/fa"
+import { RiVipCrownFill } from "react-icons/ri"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { addToCart } from "../../../slices/cartSlice"
 import { ACCOUNT_TYPE } from "../../../utils/constants"
+import { isPro } from "../../../utils/planUtils"
 
 // const CourseIncludes = [
 //   "8 hours on-demand video",
@@ -38,6 +40,15 @@ function CourseDetailsCard({ course, setConfirmationModal, handleBuyCourse }) {
       toast.error("You are an Instructor. You can't buy a course.")
       return
     }
+    if (
+      user?.accountType === ACCOUNT_TYPE.STUDENT &&
+      !isPro(user.subscriptionPlan) &&
+      !course?.studentsEnroled.includes(user?._id) &&
+      (user.courses?.length || 0) >= 1
+    ) {
+      toast.error("Free plan is limited to 1 active course. Upgrade to Pro for unlimited courses.")
+      return
+    }
     if (token) {
       dispatch(addToCart(course))
       return
@@ -53,6 +64,14 @@ function CourseDetailsCard({ course, setConfirmationModal, handleBuyCourse }) {
   }
 
   // console.log("Student already enrolled ", course?.studentsEnroled, user?._id)
+
+  const alreadyEnrolledHere = user && course?.studentsEnroled.includes(user?._id)
+  const atFreePlanLimit =
+    user &&
+    user.accountType === ACCOUNT_TYPE.STUDENT &&
+    !isPro(user.subscriptionPlan) &&
+    !alreadyEnrolledHere &&
+    (user.courses?.length || 0) >= 1
 
   return (
     <>
@@ -74,22 +93,38 @@ function CourseDetailsCard({ course, setConfirmationModal, handleBuyCourse }) {
               `Rs. ${CurrentPrice}`
             )}
           </div>
+          {atFreePlanLimit && (
+            <div className="mb-4 flex items-start gap-2 rounded-md border border-yellow-500/30 bg-yellow-900/20 p-3 text-sm text-yellow-50">
+              <RiVipCrownFill className="mt-0.5 flex-shrink-0" />
+              <span>
+                Free plan is limited to 1 active course.{" "}
+                <Link to="/pricing" className="font-semibold underline hover:text-yellow-25">
+                  Upgrade to Pro
+                </Link>{" "}
+                for unlimited courses.
+              </span>
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             <button
               className="yellowButton"
               onClick={
-                user && course?.studentsEnroled.includes(user?._id)
+                alreadyEnrolledHere
                   ? () => navigate("/dashboard/enrolled-courses")
+                  : atFreePlanLimit
+                  ? () => navigate("/pricing")
                   : handleBuyCourse
               }
             >
-              {user && course?.studentsEnroled.includes(user?._id)
+              {alreadyEnrolledHere
                 ? "Go To Course"
+                : atFreePlanLimit
+                ? "Upgrade to Enroll"
                 : CurrentPrice === 0
                 ? "Enroll for Free"
                 : "Buy Now"}
             </button>
-            {(!user || !course?.studentsEnroled.includes(user?._id)) && CurrentPrice !== 0 && (
+            {!alreadyEnrolledHere && CurrentPrice !== 0 && !atFreePlanLimit && (
               <button onClick={handleAddToCart} className="blackButton">
                 Add to Cart
               </button>
