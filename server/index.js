@@ -38,7 +38,7 @@ database.connect();
 const allowedOrigins = [
 	"http://localhost:3000",
 	"http://localhost:5173",
-	"http://13.60.233.66",
+	"https://study-notion-project-phi.vercel.app",
 	process.env.FRONTEND_URL,
 ].filter(Boolean);
 
